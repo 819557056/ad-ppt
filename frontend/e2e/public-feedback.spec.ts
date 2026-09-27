@@ -14,7 +14,7 @@ test('real public feedback: submit on landing, inspect in admin inbox, and reaut
   await page.getByRole('textbox', { name: '问题描述' }).fill(message);
   await page.getByRole('textbox', { name: /联系邮箱/ }).fill('feedback-check@example.com');
   await page.getByRole('button', { name: '提交反馈' }).click();
-  await expect(page.getByRole('status')).toContainText('已收到');
+  await expect(page.getByRole('status').filter({ hasText: '已收到' })).toBeVisible();
 
   await page.goto('/app');
   await expect(page.getByRole('button', { name: '反馈问题' })).toBeVisible();
