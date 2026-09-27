@@ -84,9 +84,10 @@ interface HistoryProps {
   readOnly?: boolean;
   projectLoader?: typeof api.listProjects;
   onExit?: () => void;
+  headerAction?: React.ReactNode;
 }
 
-export const History: React.FC<HistoryProps> = ({ readOnly = false, projectLoader = api.listProjects, onExit }) => {
+export const History: React.FC<HistoryProps> = ({ readOnly = false, projectLoader = api.listProjects, onExit, headerAction }) => {
   const navigate = useNavigate();
   const { i18n } = useTranslation();
   const t = useT(historyI18n); // 组件内翻译 + 自动 fallback 到全局
@@ -434,6 +435,7 @@ export const History: React.FC<HistoryProps> = ({ readOnly = false, projectLoade
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-foreground-primary mb-1 md:mb-2">{t('history.title')}</h1>
             <p className="text-sm md:text-base text-gray-600 dark:text-foreground-tertiary">{t(readOnly ? 'history.readOnlySubtitle' : 'history.subtitle')}</p>
           </div>
+          {headerAction}
           {onExit && <Button variant="secondary" size="sm" onClick={onExit}>{t('history.exit')}</Button>}
           {projects.length > 0 && selectedProjects.size > 0 && (
             <div className="flex items-center gap-3">

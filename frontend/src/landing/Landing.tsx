@@ -8,6 +8,7 @@ import { GrainSteps } from './GrainSteps';
 import { FeatureArtwork } from './FeatureArtwork';
 import { ScenarioArtwork } from './ScenarioArtwork';
 import { Footer } from './Footer';
+import { FeedbackWidget } from '@/components/shared/FeedbackWidget';
 
 const copy = {
   zh: {
@@ -67,6 +68,7 @@ export function Landing() {
   const [expanded, setExpanded] = useState<number | null>(0);
   const [scenario, setScenario] = useState(1);
   return <div className="landing-page">
+    <FeedbackWidget />
     <header className="landing-nav landing-container">
       <a href="/" className="brand" aria-label="Banana Slides"><img src={logoUrl} alt="" width="32" height="32" /><span>Banana Slides</span></a>
       <nav aria-label={t('product')}><a href="#product">{t('product')}</a><a href="#scenarios">{t('scenarios')}</a><a href="#faq">{t('faq')}</a><a href="https://docs.bananaslides.online" target="_blank" rel="noopener noreferrer">{t('docs')}</a></nav>
