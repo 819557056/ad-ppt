@@ -24,7 +24,19 @@ def test_feedback_migration_preserves_existing_backport_table(tmp_path):
             INSERT INTO feedback (message, page_path, created_at)
             VALUES ('already received', '/', '2026-09-27 00:00:00');
         ''')
+    command.upgrade(config, 'b82a4ddcb102')
+    with sqlite3.connect(database) as connection:
+        connection.executescript('''
+            CREATE TABLE waitlist_signups (
+                id INTEGER PRIMARY KEY,
+                email VARCHAR(254) NOT NULL UNIQUE,
+                created_at DATETIME NOT NULL
+            );
+            INSERT INTO waitlist_signups (email, created_at)
+            VALUES ('already-waiting@example.com', '2026-09-27 00:00:00');
+        ''')
     command.upgrade(config, 'head')
     with sqlite3.connect(database) as connection:
         assert connection.execute('SELECT message FROM feedback').fetchone()[0] == 'already received'
-        assert connection.execute('SELECT version_num FROM alembic_version').fetchone()[0] == 'b82a4ddcb102'
+        assert connection.execute('SELECT version_num FROM alembic_version').fetchone()[0] == 'c42f8e9a1b70'
+        assert connection.execute('SELECT email FROM waitlist_signups').fetchone()[0] == 'already-waiting@example.com'
