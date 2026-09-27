@@ -5,6 +5,16 @@ import { randomUUID } from 'node:crypto';
 // E2E_WEB_BUILD=1 BASE_URL=http://localhost:3488 CI=true npx playwright test e2e/web-build-deep-links.spec.ts
 test.skip(process.env.E2E_WEB_BUILD !== '1', 'Requires a built public-demo frontend and real backend');
 
+test('default build preserves the existing home page', async ({ page }) => {
+  test.skip(process.env.E2E_PUBLIC_LANDING === '1', 'The official site explicitly opts in to landing');
+  await page.addInitScript(() => localStorage.setItem('hasSeenHelpModal', 'true'));
+  await page.goto('/');
+  await expect(page.getByRole('textbox').first()).toBeVisible();
+  await expect(page.locator('.landing-page')).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByRole('button', { name: '下一步', exact: true })).toBeVisible();
+});
+
 test('built web admin history loads directly and after refresh', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
@@ -12,6 +22,16 @@ test('built web admin history loads directly and after refresh', async ({ page }
   await expect(page.getByLabel('管理员口令')).toBeVisible();
   await page.reload();
   await expect(page.getByRole('button', { name: '查看历史', exact: true })).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
+test('built web feedback inbox loads directly and after refresh', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.goto('/admin/feedback');
+  await expect(page.getByLabel('管理员口令')).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole('button', { name: '查看反馈' })).toBeVisible();
   expect(errors).toEqual([]);
 });
 
