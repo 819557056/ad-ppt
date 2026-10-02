@@ -30,7 +30,7 @@ const previewI18n = {
     preview: {
       title: "预览", pageCount: "共 {{count}} 页", export: "导出", exportTasks: "导出任务",
       exportPptx: "导出为 PPTX", exportPdf: "导出为 PDF",
-      exportEditablePptx: "导出可编辑 PPTX（Beta）", exportImages: "导出为图片",
+      exportEditablePptx: "导出可编辑 PPTX（图片识别）", exportStructuredPptx: "导出结构化可编辑 PPTX", exportStructuredPptxTip: "直接用大纲文字生成原生文本和形状，无需 MinerU／百度 OCR；版式为简洁模板，不复刻已生成图片。", exportImages: "导出为图片",
       exportVideo: "导出为讲解视频",
       videoSettingsLoading: "正在加载视频设置...",
       videoSettingsLoadFailed: "无法加载视频导出设置，请重试后再导出",
@@ -168,7 +168,7 @@ const previewI18n = {
     preview: {
       title: "Preview", pageCount: "{{count}} pages", export: "Export", exportTasks: "Export Tasks",
       exportPptx: "Export as PPTX", exportPdf: "Export as PDF",
-      exportEditablePptx: "Export Editable PPTX (Beta)", exportImages: "Export as Images",
+      exportEditablePptx: "Export Editable PPTX (Image Analysis)", exportStructuredPptx: "Export Structured Editable PPTX", exportStructuredPptxTip: "Creates native text and shapes from the outline without OCR. Uses a clean template rather than replicating generated slide images.", exportImages: "Export as Images",
       exportVideo: "Export as Narration Video",
       videoSettingsLoading: "Loading video settings...",
       videoSettingsLoadFailed: "Could not load video export settings. Please retry before exporting.",
@@ -328,7 +328,7 @@ import { PagePropertiesDrawer, clampWidth, readStoredDrawerWidth } from '@/compo
 import { useProjectStore } from '@/store/useProjectStore';
 import { useExportTasksStore, type ExportTaskType } from '@/store/useExportTasksStore';
 import { getImageUrl } from '@/api/client';
-import { getPageImageVersions, setCurrentImageVersion, updateProject, uploadTemplate, exportPPTX as apiExportPPTX, exportPDF as apiExportPDF, exportImages as apiExportImages, exportEditablePPTX as apiExportEditablePPTX, exportVideo as apiExportVideo, getSettings, getElevenLabsVoices, updateSettings } from '@/api/endpoints';
+import { getPageImageVersions, setCurrentImageVersion, updateProject, uploadTemplate, exportPPTX as apiExportPPTX, exportStructuredPPTX as apiExportStructuredPPTX, exportPDF as apiExportPDF, exportImages as apiExportImages, exportEditablePPTX as apiExportEditablePPTX, exportVideo as apiExportVideo, getSettings, getElevenLabsVoices, updateSettings } from '@/api/endpoints';
 import type { ImageVersion, DescriptionContent, ExportExtractorMethod, ExportInpaintMethod, Page, NarrationConfig } from '@/types';
 import { normalizeErrorMessage } from '@/utils';
 
@@ -1648,7 +1648,7 @@ export const SlidePreview: React.FC = () => {
   };
 
   const handleExport = async (
-    type: 'pptx' | 'pdf' | 'editable-pptx' | 'images' | 'video',
+    type: 'pptx' | 'structured-pptx' | 'pdf' | 'editable-pptx' | 'images' | 'video',
     options?: {
       pptxTransitionEnabled?: boolean;
       pptxTransitionEffects?: PptxTransitionEffect[];
@@ -1662,13 +1662,15 @@ export const SlidePreview: React.FC = () => {
     const backendTaskId = type === 'editable-pptx' ? crypto.randomUUID() : undefined;
 
     try {
-      if (type === 'pptx' || type === 'pdf' || type === 'images') {
+      if (type === 'pptx' || type === 'structured-pptx' || type === 'pdf' || type === 'images') {
         // Synchronous export - direct download, create completed task directly
         const response = type === 'pptx'
           ? await apiExportPPTX(projectId, pageIds, {
               transitionEnabled: options?.pptxTransitionEnabled,
               transitionEffects: options?.pptxTransitionEffects,
             })
+          : type === 'structured-pptx'
+            ? await apiExportStructuredPPTX(projectId, pageIds)
           : type === 'pdf'
             ? await apiExportPDF(projectId, pageIds)
             : await apiExportImages(projectId, pageIds);
@@ -1678,7 +1680,7 @@ export const SlidePreview: React.FC = () => {
             id: exportTaskId,
             taskId: '',
             projectId,
-            type: type as ExportTaskType,
+            type: (type === 'structured-pptx' ? 'pptx' : type) as ExportTaskType,
             status: 'COMPLETED',
             downloadUrl,
             pageIds: pageIds,
@@ -2350,6 +2352,14 @@ export const SlidePreview: React.FC = () => {
                   className="w-full px-4 py-2 text-left hover:bg-gray-50 dark:hover:bg-background-hover transition-colors text-sm disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   {t('preview.exportEditablePptx')}
+                </button>
+                <button
+                  onClick={() => handleExport('structured-pptx')}
+                  disabled={!currentProject?.pages?.length}
+                  title={t('preview.exportStructuredPptxTip')}
+                  className="w-full px-4 py-2 text-left hover:bg-gray-50 dark:hover:bg-background-hover transition-colors text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {t('preview.exportStructuredPptx')}
                 </button>
                 <button
                   onClick={() => handleExport('pdf')}

@@ -526,6 +526,31 @@ npm run dev
 
 打开浏览器访问即可使用应用。
 
+#### 结构化可编辑 PPTX 导出
+
+在预览页「导出」中选择「导出结构化可编辑 PPTX」，系统会直接读取各页已保存的
+大纲标题和要点，使用 `python-pptx` 生成原生文字框与形状，并在保存后重新打开
+PPTX 检查文件结构、页数及可编辑文本。此路径不调用 MinerU、百度 OCR 或生图服务，
+即使尚未生成整页图片也可导出。它使用简洁的内置版式，**不复刻**已生成的幻灯片
+图片；每页最多支持 8 条要点，超过时会明确报错，不会静默丢弃内容。
+
+原有「导出可编辑 PPTX（图片识别）」仍保留，适合尽量还原已生成图片的视觉效果，
+但依赖图片识别服务。已导出的文件可用只读接口
+`GET /api/projects/{project_id}/export/pptx-quality?filename=xxx.pptx` 获取基础质检报告。
+当前质检是 PPTX 包和对象结构校验，并非视觉渲染比对。
+
+#### 通过 Codex SDK 连接 Responses 网关（文本／图片识别）
+
+在 **设置 → 文本模型**（如需图片识别，也在 **图片识别模型**）的提供商格式中选择
+`Codex SDK (app-server)`，填入网关支持的模型、API Base URL（通常以 `/v1` 结尾）
+及网关 API Key，然后保存并先运行对应的服务测试。留空的单模型 Key／Base URL
+会回退到 `OPENAI_API_KEY`／`OPENAI_API_BASE`。
+
+此选项通过官方 Python Codex SDK 启动本地 app-server，使用 Responses API；网关必须
+支持 `/v1/responses` 与流式 SSE，并允许 app-server 客户端。它**不**复用页面中
+`Codex (OpenAI OAuth)` 的直连实现，也**不**提供生图 API；图片模型仍需单独配置。
+SDK 的本地运行数据保存在忽略版本控制的 `backend/instance/codex-sdk/`。
+
 
 ## 交流群
 

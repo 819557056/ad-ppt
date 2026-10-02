@@ -43,6 +43,8 @@ dependencies = [
     "opencv-python-headless>=4.13.0.92",
     "elevenlabs>=2.45.0",
     "onnxruntime>=1.18.0",
+    "openai-codex==0.159.3",
+    "openai-codex-cli-bin==0.159.3",
 ]
 
 [project.optional-dependencies]
@@ -57,6 +59,15 @@ test = [
 
 [project.scripts]
 banana-cli = "cli.banana_cli.__main__:main"
+
+[[tool.uv.index]]
+name = "pypi"
+url = "https://pypi.org/simple"
+explicit = true
+
+[tool.uv.sources]
+openai-codex = { index = "pypi" }
+openai-codex-cli-bin = { index = "pypi" }
 
 [tool.setuptools.packages.find]
 include = ["cli*"]

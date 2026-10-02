@@ -11,6 +11,9 @@
 *.heic
 *.heif
 *.avif
+tmp/
+.python-version
+.idea
 
 !frontend/public/**/*.png
 !frontend/src/assets/**/*.png
@@ -50,6 +53,7 @@
 !docs/superpowers/specs/*.md
 !docs/superpowers/plans/*.md
 !docs/desktop-handover.md
+!docs/zh/editable-pptx-technical-analysis.md
 !.github/**/*.md
 *.pyc
 .env
@@ -94,3 +98,5 @@ frontend/cap-real.mjs
 /banana-slides-landing.html
 /design-mockup.html
 /design-system-proposal.html
+
+!docs/zh/web-ppt-editor-design.md

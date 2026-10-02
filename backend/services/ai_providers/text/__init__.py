@@ -5,5 +5,6 @@ from .openai_provider import OpenAITextProvider
 from .anthropic_provider import AnthropicTextProvider
 from .lazyllm_provider import LazyLLMTextProvider
 from .codex_provider import CodexTextProvider
+from .codex_sdk_provider import CodexSDKTextProvider
 
-__all__ = ['TextProvider', 'GenAITextProvider', 'OpenAITextProvider', 'AnthropicTextProvider', 'LazyLLMTextProvider', 'CodexTextProvider', 'strip_think_tags']
+__all__ = ['TextProvider', 'GenAITextProvider', 'OpenAITextProvider', 'AnthropicTextProvider', 'LazyLLMTextProvider', 'CodexTextProvider', 'CodexSDKTextProvider', 'strip_think_tags']

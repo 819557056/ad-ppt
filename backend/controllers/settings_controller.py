@@ -393,7 +393,10 @@ def update_settings():
             settings.text_model_source = (data["text_model_source"] or "").strip() or None
 
         if "image_model_source" in data:
-            settings.image_model_source = (data["image_model_source"] or "").strip() or None
+            image_source = (data["image_model_source"] or "").strip() or None
+            if image_source == "codex_sdk":
+                return bad_request("Codex SDK app-server does not provide an image-generation API")
+            settings.image_model_source = image_source
 
         if "openai_image_api_protocol" in data:
             protocol = data["openai_image_api_protocol"]
@@ -899,6 +902,8 @@ def _create_file_parser():
             caption_format = 'openai'
         elif source_lower == 'codex':
             caption_format = 'codex'
+        elif source_lower == 'codex_sdk':
+            caption_format = 'codex_sdk'
         elif source_lower in LAZYLLM_VENDORS:
             caption_format = 'lazyllm'
         else:
@@ -912,7 +917,7 @@ def _create_file_parser():
         google_base = current_app.config.get("IMAGE_CAPTION_API_BASE") or current_app.config.get("GOOGLE_API_BASE", "")
         openai_key = ""
         openai_base = ""
-    elif caption_format == 'openai':
+    elif caption_format in ('openai', 'codex_sdk'):
         google_key = ""
         google_base = ""
         openai_key = current_app.config.get("IMAGE_CAPTION_API_KEY") or current_app.config.get("OPENAI_API_KEY", "")

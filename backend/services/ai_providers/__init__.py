@@ -21,14 +21,14 @@ import os
 import logging
 from typing import Any, Dict, Optional
 
-from .text import TextProvider, GenAITextProvider, OpenAITextProvider, AnthropicTextProvider, LazyLLMTextProvider, CodexTextProvider
+from .text import TextProvider, GenAITextProvider, OpenAITextProvider, AnthropicTextProvider, LazyLLMTextProvider, CodexTextProvider, CodexSDKTextProvider
 from .image import ImageProvider, GenAIImageProvider, OpenAIImageProvider, AnthropicImageProvider, LazyLLMImageProvider, CodexImageProvider
 from .lazyllm_env import TEXT2IMAGE_CAPABLE_LAZYLLM_VENDORS
 
 logger = logging.getLogger(__name__)
 
 __all__ = [
-    'TextProvider', 'GenAITextProvider', 'OpenAITextProvider', 'AnthropicTextProvider', 'LazyLLMTextProvider', 'CodexTextProvider',
+    'TextProvider', 'GenAITextProvider', 'OpenAITextProvider', 'AnthropicTextProvider', 'LazyLLMTextProvider', 'CodexTextProvider', 'CodexSDKTextProvider',
     'ImageProvider', 'GenAIImageProvider', 'OpenAIImageProvider', 'AnthropicImageProvider', 'LazyLLMImageProvider', 'CodexImageProvider',
     'get_text_provider', 'get_image_provider', 'get_provider_format',
     'get_caption_provider', 'get_image_caption_provider_config', 'LAZYLLM_VENDORS',
@@ -272,6 +272,17 @@ def _get_model_type_provider_config(model_type: str) -> Dict[str, Any]:
         logger.info("Per-model config — %s: openai, api_base: %s", model_type, api_base)
         return {'format': 'openai', 'api_key': api_key, 'api_base': api_base}
 
+    elif source_lower == 'codex_sdk':
+        if model_type == 'image':
+            raise ValueError("Codex SDK is not an image-generation API; choose a separate image provider")
+        api_key = _resolve_setting(f'{prefix}_API_KEY') or _resolve_setting('OPENAI_API_KEY')
+        api_base = _resolve_setting(f'{prefix}_API_BASE') or _resolve_setting('OPENAI_API_BASE')
+        if not api_key or not api_base:
+            raise ValueError(
+                f"Codex SDK {model_type} needs an OpenAI-compatible gateway key and Base URL"
+            )
+        return {'format': 'codex_sdk', 'api_key': api_key, 'api_base': api_base}
+
     elif source_lower == 'volcengine':
         api_key = (_resolve_setting(f'{prefix}_API_KEY')
                    or _resolve_setting('VOLCENGINE_API_KEY')
@@ -346,6 +357,9 @@ def get_caption_provider(model: str = "gemini-3-flash-preview") -> TextProvider:
     elif fmt == 'codex':
         logger.info("Caption provider: Codex (OAuth), model=%s", model)
         return CodexTextProvider(api_key=config['api_key'], model=model)
+    elif fmt == 'codex_sdk':
+        logger.info("Caption provider: Codex SDK app-server, model=%s", model)
+        return CodexSDKTextProvider(api_key=config['api_key'], api_base=config['api_base'], model=model)
     else:
         logger.info("Caption provider: Gemini, model=%s", model)
         return GenAITextProvider(api_key=config['api_key'], api_base=config['api_base'], model=model)
@@ -375,6 +389,9 @@ def get_text_provider(model: str = "gemini-3-flash-preview") -> TextProvider:
     elif fmt == 'codex':
         logger.info("Text provider: Codex (OAuth), model=%s", model)
         return CodexTextProvider(api_key=config['api_key'], model=model)
+    elif fmt == 'codex_sdk':
+        logger.info("Text provider: Codex SDK app-server, model=%s", model)
+        return CodexSDKTextProvider(api_key=config['api_key'], api_base=config['api_base'], model=model)
     else:
         # gemini (default)
         logger.info("Text provider: Gemini, model=%s", model)

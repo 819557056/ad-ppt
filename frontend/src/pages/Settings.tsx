@@ -85,11 +85,12 @@ const getAllProviderSources = (isZh: boolean) => [
   { value: 'volcengine', label: isZh ? '火山 Agent Plan' : 'Volcengine Agent Plan' },
   { value: 'doubao', label: isZh ? 'Doubao（豆包）' : 'Doubao / ModelArk' },
   { value: 'codex', label: 'Codex (OpenAI OAuth)' },
+  { value: 'codex_sdk', label: 'Codex SDK (app-server)' },
   ...LAZYLLM_SOURCES.filter(s => !['openai', 'doubao', 'ppio', 'aiping'].includes(s.value)), // avoid duplicate or non-partner providers
 ];
 
 // 需要 API Key + Base URL 的提供商（非 LazyLLM 厂商）
-const API_KEY_PROVIDERS = new Set(['gemini', 'openai', 'volcengine']);
+const API_KEY_PROVIDERS = new Set(['gemini', 'openai', 'volcengine', 'codex_sdk']);
 const APIMART_RECOMMENDED_MODELS = {
   text: 'gpt-5.6-sol',
   image: 'gpt-image-2.5-flare',
@@ -144,9 +145,11 @@ const IMAGE_CAPABLE_LAZYLLM_SOURCES = new Set([
 // real OpenAI provider plus LazyLLM vendors that register a text2image
 // supplier. Non-LazyLLM sources (gemini/volcengine/codex) always pass.
 const isImageModelSourceSelectable = (value: string) =>
-  value === 'openai'
-  || !LAZYLLM_VENDOR_SET.has(value)
-  || IMAGE_CAPABLE_LAZYLLM_SOURCES.has(value);
+  value !== 'codex_sdk' && (
+    value === 'openai'
+    || !LAZYLLM_VENDOR_SET.has(value)
+    || IMAGE_CAPABLE_LAZYLLM_SOURCES.has(value)
+  );
 
 // 初始表单数据
 const initialFormData = {
@@ -659,7 +662,7 @@ export const Settings: React.FC = () => {
     { value: 'apimart', label: 'APIMart' },
     allProviderSources[2],
     allProviderSources[1],
-    ...allProviderSources.slice(3),
+    ...allProviderSources.slice(3).filter(option => option.value !== 'codex_sdk'),
   ];
   const volcengineAgentPlansUrl = isZh ? VOLCENGINE_AGENTPLANS_CN_URL : VOLCENGINE_AGENTPLANS_EN_URL;
   const volcengineLogoUrl = isZh ? '/volcengine/huoshan.png' : '/volcengine/byteplus.png';
@@ -1471,6 +1474,9 @@ export const Settings: React.FC = () => {
                   : []
               )}
           </select>
+          {sourceValue === 'codex_sdk' && (
+            <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">{t('settings.fields.codexSdkHint')}</p>
+          )}
           <p className="mt-1 text-sm text-gray-500 dark:text-foreground-tertiary">
             {t('settings.fields.modelProviderDesc')}
           </p>

@@ -621,6 +621,8 @@ class ExportService:
         # Save or return bytes
         if output_file:
             prs.save(output_file)
+            from services.structured_pptx_service import inspect_pptx
+            inspect_pptx(output_file, expected_slides=len(prs.slides))
             return None
         else:
             # Save to bytes
@@ -1830,6 +1832,9 @@ class ExportService:
         report_progress("保存文件", "正在保存PPTX文件...", 95)
         if output_file:
             builder.save(output_file)
+            from services.structured_pptx_service import inspect_pptx
+            quality = inspect_pptx(output_file, expected_slides=total_pages)
+            logger.info("PPTX quality: %s", quality)
             report_progress("完成", f"可编辑PPTX已保存", 100)
             logger.info(f"✓ 可编辑PPTX已保存: {output_file}")
             

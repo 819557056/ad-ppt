@@ -714,6 +714,19 @@ export const exportPPTX = async (
   return response.data;
 };
 
+/** Export native editable text and shapes directly from the saved page outline. */
+export const exportStructuredPPTX = async (
+  projectId: string,
+  pageIds?: string[],
+): Promise<ApiResponse<{
+  download_url: string;
+  download_url_absolute?: string;
+  quality: { slide_count: number; editable_text_shapes: number; warnings: string[] };
+}>> => {
+  const response = await apiClient.get(`/api/projects/${projectId}/export/structured-pptx${buildPageIdsQuery(pageIds)}`);
+  return response.data;
+};
+
 /**
  * 导出为PDF
  * @param projectId 项目ID

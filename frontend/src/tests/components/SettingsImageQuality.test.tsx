@@ -94,6 +94,25 @@ describe('Settings image quality tier', () => {
     }));
   });
 
+  it('offers Codex SDK for text and caption, but not image generation', async () => {
+    renderSettings();
+    const textSource = await screen.findByTestId('text_model_source-select') as HTMLSelectElement;
+    const imageSource = screen.getByTestId('image_model_source-select') as HTMLSelectElement;
+    const captionSource = screen.getByTestId('image_caption_model_source-select') as HTMLSelectElement;
+    const hasSdk = (select: HTMLSelectElement) =>
+      Array.from(select.options).some(option => option.value === 'codex_sdk');
+
+    expect(hasSdk(textSource)).toBe(true);
+    expect(hasSdk(captionSource)).toBe(true);
+    expect(hasSdk(imageSource)).toBe(false);
+
+    await userEvent.selectOptions(textSource, 'codex_sdk');
+    await userEvent.click(screen.getByRole('button', { name: /保存设置|Save Settings/ }));
+    await waitFor(() => expect(updateSettings).toHaveBeenCalledWith(
+      expect.objectContaining({ text_model_source: 'codex_sdk' })
+    ));
+  });
+
   it('saves the selected quality tier for OpenAI-compatible image models', async () => {
     renderSettings();
 

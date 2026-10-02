@@ -207,6 +207,8 @@ def export_pptx(project_id):
             aspect_ratio=project.image_aspect_ratio,
             transition_effects=transition_effects,
         )
+        from services.structured_pptx_service import inspect_pptx
+        quality = inspect_pptx(output_path)
 
         # Build download URLs
         download_path = f"/files/{project_id}/exports/{filename}"
@@ -217,12 +219,81 @@ def export_pptx(project_id):
             data={
                 "download_url": download_path,
                 "download_url_absolute": download_url_absolute,
+                "quality": quality,
             },
             message="Export PPTX task created"
         )
     
     except Exception as e:
         return error_response('SERVER_ERROR', str(e), 500)
+
+
+@export_bp.route('/<project_id>/export/structured-pptx', methods=['GET'])
+def export_structured_pptx(project_id):
+    """Export native, editable PowerPoint objects from the saved page outline.
+
+    This intentionally does not use generated slide bitmaps or OCR. The visual
+    design is a simple native layout, not a pixel-perfect copy of the images.
+    """
+    project = db.session.get(Project, project_id)
+    if not project:
+        return not_found('Project')
+
+    selected_page_ids = parse_page_ids_from_query(request)
+    pages = get_filtered_pages(project_id, selected_page_ids if selected_page_ids else None)
+    if not pages:
+        return bad_request('No pages found for project')
+
+    exports_root = _resolve_exports_root(project_id)
+    if exports_root is None:
+        return bad_request('Invalid project ID')
+    exports_root.mkdir(parents=True, exist_ok=True)
+    filename = secure_filename(request.args.get('filename') or f'presentation_structured_{project_id}.pptx')
+    if not filename.lower().endswith('.pptx'):
+        filename += '.pptx'
+    if not filename or filename == '.pptx':
+        return bad_request('Invalid export filename')
+
+    from services.structured_pptx_service import create_structured_pptx, inspect_pptx
+    output_path = exports_root / filename
+    temporary_path = exports_root / f'.{uuid.uuid4().hex}.pptx'
+    try:
+        create_structured_pptx(project, pages, temporary_path)
+        quality = inspect_pptx(temporary_path, expected_slides=len(pages), require_editable=True)
+        os.replace(temporary_path, output_path)
+    except Exception as exc:
+        temporary_path.unlink(missing_ok=True)
+        logger.exception('Structured PPTX export failed for project %s', project_id)
+        return error_response('STRUCTURED_EXPORT_FAILED', str(exc), 500)
+
+    download_path = f'/files/{project_id}/exports/{filename}'
+    return success_response(data={
+        'download_url': download_path,
+        'download_url_absolute': request.url_root.rstrip('/') + download_path,
+        'quality': quality,
+        'method': 'structured',
+    }, message='Structured editable PPTX created')
+
+
+@export_bp.route('/<project_id>/export/pptx-quality', methods=['GET'])
+def inspect_exported_pptx(project_id):
+    """Read-only validation for any existing PPTX export, including OCR output."""
+    if not db.session.get(Project, project_id):
+        return not_found('Project')
+    filename = request.args.get('filename', '')
+    if not filename or secure_filename(filename) != filename or not filename.lower().endswith('.pptx'):
+        return bad_request('A valid PPTX filename is required')
+    exports_root = _resolve_exports_root(project_id)
+    if exports_root is None:
+        return bad_request('Invalid project ID')
+    output_path = exports_root / filename
+    if not output_path.is_file():
+        return not_found('PPTX export')
+    from services.structured_pptx_service import inspect_pptx
+    try:
+        return success_response(data=inspect_pptx(output_path))
+    except Exception as exc:
+        return error_response('PPTX_VALIDATION_FAILED', str(exc), 422)
 
 
 @export_bp.route('/<project_id>/export/pdf', methods=['GET'])
