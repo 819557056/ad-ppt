@@ -4,6 +4,7 @@ Project model
 import uuid
 from datetime import datetime
 from . import db
+from sqlalchemy.dialects.postgresql import JSONB
 
 
 class Project(db.Model):
@@ -13,6 +14,15 @@ class Project(db.Model):
     __tablename__ = 'projects'
     
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    owner_id = db.Column(db.String(36), db.ForeignKey('principals.id'), nullable=True, index=True)
+    editor_mode = db.Column(db.String(20), nullable=False, default='legacy_image', server_default='legacy_image')
+    row_version = db.Column(db.BigInteger, nullable=False, default=0, server_default='0')
+    canvas_width_pt = db.Column(db.Numeric(10, 2), nullable=True)
+    canvas_height_pt = db.Column(db.Numeric(10, 2), nullable=True)
+    font_manifest_id = db.Column(db.String(64), nullable=True)
+    active_plan_id = db.Column(db.String(36), nullable=True)
+    model_config_json = db.Column(db.JSON().with_variant(JSONB, 'postgresql'), nullable=False, default=dict, server_default='{}')
+    deleted_at = db.Column(db.DateTime(timezone=True), nullable=True)
     project_title = db.Column(db.String(255), nullable=True)
     idea_prompt = db.Column(db.Text, nullable=True)
     outline_text = db.Column(db.Text, nullable=True)  # 用户输入的大纲文本（用于outline类型）

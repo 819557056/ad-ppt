@@ -4,6 +4,7 @@ from pathlib import Path
 
 from alembic import command
 from alembic.config import Config
+from alembic.script import ScriptDirectory
 
 
 def test_feedback_migration_preserves_existing_backport_table(tmp_path):
@@ -36,7 +37,8 @@ def test_feedback_migration_preserves_existing_backport_table(tmp_path):
             VALUES ('already-waiting@example.com', '2026-09-27 00:00:00');
         ''')
     command.upgrade(config, 'head')
+    current_head = ScriptDirectory.from_config(config).get_current_head()
     with sqlite3.connect(database) as connection:
         assert connection.execute('SELECT message FROM feedback').fetchone()[0] == 'already received'
-        assert connection.execute('SELECT version_num FROM alembic_version').fetchone()[0] == 'c42f8e9a1b70'
+        assert connection.execute('SELECT version_num FROM alembic_version').fetchone()[0] == current_head
         assert connection.execute('SELECT email FROM waitlist_signups').fetchone()[0] == 'already-waiting@example.com'

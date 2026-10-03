@@ -1,20 +1,8 @@
 """Database models package"""
 from flask_sqlalchemy import SQLAlchemy
 
-# 创建 SQLAlchemy 实例，配置 SQLite 连接选项
-db = SQLAlchemy(
-    engine_options={
-        'connect_args': {
-            'check_same_thread': False,  # 允许跨线程使用（仅SQLite）
-            'timeout': 30,  # 数据库锁定超时（秒）- SQLite特定
-        },
-        'pool_pre_ping': True,  # 连接前检查，确保连接有效
-        'pool_recycle': 3600,  # 1小时回收连接，释放文件句柄
-        'pool_size': 10,
-        'max_overflow': 50,
-        'pool_timeout': 30,  # 获取连接的超时时间（秒）
-    }
-)
+# Dialect-specific options are configured by Config.SQLALCHEMY_ENGINE_OPTIONS.
+db = SQLAlchemy()
 
 from .project import Project
 from .page import Page
@@ -28,6 +16,10 @@ from .user_style_template import UserStyleTemplate
 from .project_template_asset import ProjectTemplateAsset
 from .feedback import Feedback
 from .waitlist_signup import WaitlistSignup
+from .scene_v1 import (Principal, Asset, PageSceneRevision, SceneCandidate,
+                       DeckSnapshot, SnapshotPage, SceneExport, GenerationPlan,
+                       SceneTaskItem, ApiIdempotencyRecord, TemplateDocument,
+                       ModelCredential, SceneTaskAttempt, SceneWorkerHeartbeat, SceneMaintenanceRun)
 
 __all__ = ['db', 'Project', 'Page', 'Task', 'UserTemplate', 'PageImageVersion', 'Material', 'ReferenceFile', 'Settings', 'UserStyleTemplate', 'ProjectTemplateAsset', 'Feedback', 'WaitlistSignup']
 

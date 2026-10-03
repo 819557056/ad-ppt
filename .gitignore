@@ -54,6 +54,7 @@ tmp/
 !docs/superpowers/plans/*.md
 !docs/desktop-handover.md
 !docs/zh/editable-pptx-technical-analysis.md
+!docs/zh/web-ppt-editor-implementation.md
 !.github/**/*.md
 *.pyc
 .env
@@ -64,9 +65,12 @@ tmp/
 gcp-service-account.json
 *.ppt
 *.pptx
+!renderer/smoke.pptx
 generate-example.py
 *.mdc
 *.pdf
+!docs/fixtures/scene_pdf_chromium_cjk.pdf
+!docs/fixtures/scene_pptx_libreoffice_text.pdf
 .cursor/worktrees.json
 uploads/
 !assets/*

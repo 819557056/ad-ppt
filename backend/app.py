@@ -36,6 +36,7 @@ from controllers.reference_file_controller import reference_file_bp
 from controllers.settings_controller import settings_bp
 from controllers.openai_oauth_controller import openai_oauth_bp
 from controllers import project_bp, page_bp, template_bp, user_template_bp, user_style_template_bp, export_bp, file_bp, style_bp, template_assets_bp, page_template_bp, template_mode_bp
+from controllers.scene_controller import scene_bp
 
 
 # Enable SQLite WAL mode for all connections
@@ -145,7 +146,10 @@ def create_app():
 
     # Initialize extensions
     db.init_app(app)
-    CORS(app, origins=cors_origins)
+    CORS(app, origins=cors_origins, expose_headers=['X-Request-ID'])
+    from services.scene.telemetry import install as install_scene_telemetry, request_id as scene_request_id
+    from services.scene.telemetry import set_error as set_scene_error
+    install_scene_telemetry(app)
     # Database migrations (Alembic via Flask-Migrate)
     Migrate(app, db)
     
@@ -166,6 +170,7 @@ def create_app():
     app.register_blueprint(settings_bp)
     app.register_blueprint(openai_oauth_bp)
     app.register_blueprint(style_bp)
+    app.register_blueprint(scene_bp)
 
     with app.app_context():
         if db_path_env:
@@ -186,7 +191,7 @@ def create_app():
                     alembic_config.set_main_option('sqlalchemy.url', app.config['SQLALCHEMY_DATABASE_URI'])
                     alembic_command.upgrade(alembic_config, 'head')
                 except Exception as e:
-                    logging.getLogger(__name__).warning(f'Alembic upgrade failed, falling back to create_all: {e}')
+                    logging.getLogger(__name__).warning('Alembic upgrade failed, falling back to create_all (%s)', type(e).__name__)
                     db.create_all()
                     from desktop_bootstrap import repair_desktop_settings_schema
                     repair_desktop_settings_schema(db)
@@ -198,21 +203,69 @@ def create_app():
         if not app.config['PUBLIC_DEMO']:
             _load_settings_to_config(app)
 
-    # Access code enforcement on all /api/ routes
+    # Access code enforcement on API and legacy file routes. Browser image and
+    # download elements cannot send the X-Access-Code header, so /files uses a
+    # short-lived HttpOnly cookie issued only after successful verification.
     @app.before_request
     def _enforce_access_code():
         from flask import request, jsonify
+        from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
         expected = os.getenv('ACCESS_CODE', '').strip()
         if not expected:
             return  # not enabled
+        if request.path.startswith('/files/'):
+            token = request.cookies.get('banana_file_access')
+            try:
+                payload = URLSafeTimedSerializer(app.secret_key,
+                    salt='banana-file-access').loads(token or '', max_age=3600)
+            except (BadSignature, SignatureExpired):
+                payload = None
+            if payload != 'files':
+                return jsonify({'error': 'Access code required'}), 403
+            return
         if not request.path.startswith('/api/'):
             return  # non-API routes (health, static, etc.)
+        if request.path.startswith('/api/v2/assets/') and request.path.endswith('/content'):
+            return  # short-lived asset signature is checked by the v2 controller
+        if request.path == '/api/v2/fonts/noto-sans-sc':
+            return
         if request.path.startswith('/api/access-code/') or request.path in ('/api/public-config', '/api/feedback', '/api/waitlist'):
             return  # allow check/verify endpoints
         code = request.headers.get('X-Access-Code', '')
         if hmac.compare_digest(code, expected):
             return
+        if request.path.startswith('/api/v2/'):
+            set_scene_error('AUTH_REQUIRED')
+            return jsonify({'error': {'code': 'AUTH_REQUIRED', 'message': 'Access code required',
+                                      'stage': 'access', 'retryable': False, 'details': {}},
+                            'request_id': scene_request_id()}), 401
         return jsonify({'error': 'Access code required'}), 403
+
+    @app.before_request
+    def _block_legacy_scene_routes():
+        from flask import request, jsonify
+        project_id = None
+        if request.path.startswith('/api/projects/'):
+            parts = request.path.split('/')
+            if len(parts) >= 4:
+                project_id = parts[3]
+        elif request.path.startswith('/files/'):
+            parts = request.path.split('/')
+            if len(parts) >= 3:
+                project_id = parts[2]
+        elif request.path.startswith('/api/reference-files/'):
+            parts = request.path.split('/')
+            if len(parts) >= 5 and parts[3] == 'project':
+                project_id = parts[4]
+            elif request.method not in ('GET', 'HEAD', 'OPTIONS'):
+                payload = request.get_json(silent=True) or {}
+                project_id = request.form.get('project_id') or payload.get('project_id')
+        if not project_id:
+            return
+        project = db.session.get(__import__('models').Project, project_id)
+        if project is not None and project.editor_mode == 'scene_v1':
+            return jsonify({'error': {'code': 'SCENE_V2_REQUIRED',
+                                      'message': 'Use /api/v2 for Scene projects'}}), 409
 
     from services.public_demo import install as install_public_demo
     install_public_demo(app)
@@ -235,12 +288,18 @@ def create_app():
     def verify_access_code():
         """Verify the provided access code"""
         from flask import request, jsonify
+        from itsdangerous import URLSafeTimedSerializer
         expected = os.getenv('ACCESS_CODE', '').strip()
         if not expected:
             return {'data': {'valid': True}}
         code = (request.json or {}).get('code', '')
         if hmac.compare_digest(code, expected):
-            return {'data': {'valid': True}}
+            response = jsonify({'data': {'valid': True}})
+            token = URLSafeTimedSerializer(app.secret_key,
+                salt='banana-file-access').dumps('files')
+            response.set_cookie('banana_file_access', token, max_age=3600,
+                httponly=True, secure=request.is_secure, samesite='Lax')
+            return response
         return jsonify({'error': 'Invalid access code'}), 403
     
     # Output language endpoint
@@ -255,7 +314,7 @@ def create_app():
             settings = Settings.get_settings()
             return {'data': {'language': settings.output_language or Config.OUTPUT_LANGUAGE}}
         except SQLAlchemyError as db_error:
-            logging.warning(f"Failed to load output language from settings: {db_error}")
+            logging.warning("Failed to load output language from settings (%s)", type(db_error).__name__)
             return {'data': {'language': Config.OUTPUT_LANGUAGE}}  # 默认中文
 
     # Root endpoint
@@ -303,7 +362,7 @@ def _load_settings_to_config(app):
             if active_api_keys:
                 app.config[active_api_keys[1]] = settings.api_base_url
             if settings.api_base_url:
-                logging.info(f"Loaded API_BASE from settings: {settings.api_base_url}")
+                logging.info("Loaded API_BASE from settings (value omitted)")
             else:
                 logging.info("API_BASE is empty in settings, using env var or default")
 
@@ -336,16 +395,16 @@ def _load_settings_to_config(app):
         # Load model settings (FIX for Issue #136: these were missing before)
         if settings.text_model:
             app.config['TEXT_MODEL'] = settings.text_model
-            logging.info(f"Loaded TEXT_MODEL from settings: {settings.text_model}")
+            logging.info("Loaded TEXT_MODEL from settings (value omitted)")
         
         if settings.image_model:
             app.config['IMAGE_MODEL'] = settings.image_model
-            logging.info(f"Loaded IMAGE_MODEL from settings: {settings.image_model}")
+            logging.info("Loaded IMAGE_MODEL from settings (value omitted)")
         
         # Load MinerU settings
         if settings.mineru_api_base:
             app.config['MINERU_API_BASE'] = settings.mineru_api_base
-            logging.info(f"Loaded MINERU_API_BASE from settings: {settings.mineru_api_base}")
+            logging.info("Loaded MINERU_API_BASE from settings (value omitted)")
         
         if settings.mineru_token:
             app.config['MINERU_TOKEN'] = settings.mineru_token
@@ -354,7 +413,7 @@ def _load_settings_to_config(app):
         # Load image caption model
         if settings.image_caption_model:
             app.config['IMAGE_CAPTION_MODEL'] = settings.image_caption_model
-            logging.info(f"Loaded IMAGE_CAPTION_MODEL from settings: {settings.image_caption_model}")
+            logging.info("Loaded IMAGE_CAPTION_MODEL from settings (value omitted)")
         
         # Load output language
         if settings.output_language:
@@ -395,7 +454,7 @@ def _load_settings_to_config(app):
                 if val:
                     app.config[config_key] = val
                     if suffix == '_API_BASE':
-                        logging.info(f"Loaded {config_key} from settings: {val}")
+                        logging.info("Loaded %s from settings (value omitted)", config_key)
                     else:
                         logging.info(f"Loaded {config_key} from settings")
 
@@ -417,9 +476,9 @@ def _load_settings_to_config(app):
 
     except Exception as e:
         if isinstance(e, SQLAlchemyError) and "no such table: settings" in str(e):
-            logging.debug(f"Settings table not yet created (expected on first boot): {e}")
+            logging.debug("Settings table not yet created (expected on first boot)")
         else:
-            logging.warning(f"Could not load settings from database: {e}")
+            logging.warning("Could not load settings from database (%s)", type(e).__name__)
 
 # Create app instance
 app = create_app()
@@ -465,13 +524,16 @@ def _port_available(port: int) -> bool:
 
     如果端口已被占用（例如另一个实例正在跑），启动会在 app.run 处失败；
     此时不应该执行任务对账，否则会把那个实例正在跑的任务误判为中断。
-    探测选项与 werkzeug 服务器保持一致（SO_REUSEADDR），
-    否则 TIME_WAIT 会被误判为"端口被占用"，导致刚重启时跳过对账。
+    POSIX 下允许 TIME_WAIT 重用；Windows 的 SO_REUSEADDR 还允许绑定正在
+    监听的端口，故改用 SO_EXCLUSIVEADDRUSE 避免误判活跃实例。
     """
     import socket
 
     probe = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    probe.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    if os.name == 'nt':
+        probe.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
+    else:
+        probe.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     try:
         probe.bind(('0.0.0.0', port))
         return True
@@ -531,6 +593,12 @@ def _acquire_instance_lock(target_app=None) -> bool:
     return True
 
 
+def _server_debug_enabled():
+    # Container entrypoints must never expose Werkzeug's debugger or reloader.
+    return (os.getenv('IN_DOCKER', '0') != '1' and
+            os.getenv('FLASK_ENV', 'development') == 'development')
+
+
 if __name__ == '__main__':
     # Run development server
     if os.getenv("IN_DOCKER", "0") == "1":
@@ -539,7 +607,7 @@ if __name__ == '__main__':
         port = int(os.getenv('BACKEND_PORT'))
     else:
         port = _compute_worktree_port(DEFAULT_BACKEND_PORT)
-    debug = os.getenv('FLASK_ENV', 'development') == 'development'
+    debug = _server_debug_enabled()
 
     if port == 0:
         from werkzeug.serving import make_server
@@ -565,8 +633,8 @@ if __name__ == '__main__':
             f"Environment: {os.getenv('FLASK_ENV', 'development')}\n"
             "Debug mode: False\n"
             f"API Base URL: http://localhost:{port}/api\n"
-            f"Database: {app.config['SQLALCHEMY_DATABASE_URI']}\n"
-            f"Uploads: {app.config['UPLOAD_FOLDER']}"
+            "Database: configured (connection details omitted)\n"
+            "Uploads: configured (path omitted)"
         )
 
         try:
@@ -587,8 +655,8 @@ if __name__ == '__main__':
         f"Environment: {os.getenv('FLASK_ENV', 'development')}\n"
         f"Debug mode: {debug}\n"
         f"API Base URL: http://localhost:{port}/api\n"
-        f"Database: {app.config['SQLALCHEMY_DATABASE_URI']}\n"
-        f"Uploads: {app.config['UPLOAD_FOLDER']}"
+        "Database: configured (connection details omitted)\n"
+        "Uploads: configured (path omitted)"
     )
 
     # Using absolute paths for database, so WSL path issues should not occur

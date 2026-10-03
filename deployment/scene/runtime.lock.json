@@ -1,0 +1,303 @@
+{
+  "schema_version": 1,
+  "reviewed_date": "2026-10-03",
+  "platforms": [
+    "linux/amd64",
+    "linux/arm64"
+  ],
+  "images": {
+    "python": {
+      "image": "python:3.12-slim-bookworm@sha256:54c85f3c47607a77f32adec749d3c81d1348bf25833671f512b26a9b6d778cb3",
+      "platforms": {
+        "amd64": "sha256:9901e0a8d75037d8242ed43155cbcb2d1f61be1356383d8054afb59fd50e39c4",
+        "arm64": "sha256:349275ed26e7aea20752e1fd63c40c30a0281d324e51fb41612c2433cb6482d4"
+      }
+    },
+    "node": {
+      "image": "node:22-bookworm@sha256:363e1587494626837fa7f9a23bdb453d13b0ff3c67c705c2805cfc69c2d2fad7",
+      "platforms": {
+        "amd64": "sha256:17b7fd60fd812617654c64b95f9b2dde94f103313073b672bc40fdad6dccbaa2",
+        "arm64": "sha256:5705a4b5da9077d28001f4ad6293b6ff7fcd4221ec3a05ad599e1d5182c606ef"
+      }
+    },
+    "nginx": {
+      "image": "nginx:stable-bookworm@sha256:552e7481ca93ffccd046aa658dbbed22caefbc09c66fa7cd247cbb90b8a5c609",
+      "platforms": {
+        "amd64": "sha256:3b03dfd827515a07ccf4946000f0bbdd2a4fb6aca7499249fcb6b1f9726823d6",
+        "arm64": "sha256:b869934f513dcd08fc9de959e0bf6175e47ff3553a9c127afce9969722304356"
+      }
+    },
+    "postgres": {
+      "image": "postgres:16.6@sha256:557fea37a744d5f4c8faab304b0a90858b53ab119735a88c131fd19dab802f36",
+      "platforms": {
+        "amd64": "sha256:2c70671424b21cc706545c364bc96d12ea1526d6080e29abf7e25b50b28ba97b",
+        "arm64": "sha256:b0841e2c9c8e2c79fbdbd30c70f278ba4816ac60f5c163ec1e43ac21ab884884"
+      }
+    },
+    "uv": {
+      "image": "ghcr.io/astral-sh/uv:0.12.22@sha256:f513a91fc62fe7c17567eee97230dd198e43edb8a9fbecca843714a4358fe1bc",
+      "platforms": {
+        "amd64": "sha256:0f1da8ef29dfee2fc8490653fe306c0242e653a160b56278d468997afc65a314",
+        "arm64": "sha256:9a5ffc1f68bf91e8e722ca22a0612e58ada597f51428b676f0e21a14d4b11edd"
+      }
+    },
+    "playwright": {
+      "image": "mcr.microsoft.com/playwright:v1.57.0-noble@sha256:3bed4b1a12f2338642f3d8cba28e291deef3c66bd4a964bbeb3e57bbff511dbd",
+      "platforms": {
+        "amd64": "sha256:8fb7af3bb488c51364d6554876a8eddf377736608327dbdf4177b4901faf7bc9",
+        "arm64": "sha256:57fae5814f69e51732ca6f6c664ba86629761d276d2c2b7b6bc2bbba2c453f0c"
+      }
+    }
+  },
+  "tools": {
+    "backend_python": "3.12.15",
+    "uv": "0.12.22",
+    "browser": {
+      "playwright": "1.57.0",
+      "chromium_revision": "1200",
+      "chromium_version": "143.0.7499.4"
+    },
+    "renderer_python_packages": {
+      "PyMuPDF": "1.27.1",
+      "defusedxml": "0.7.1"
+    }
+  },
+  "dockerfiles": {
+    "backend/Dockerfile.scene": {
+      "component": "backend",
+      "images": [
+        "uv",
+        "python"
+      ]
+    },
+    "frontend/Dockerfile.scene": {
+      "component": "frontend",
+      "images": [
+        "python",
+        "node",
+        "nginx"
+      ]
+    },
+    "renderer/Dockerfile": {
+      "component": "renderer",
+      "images": [
+        "python",
+        "playwright"
+      ]
+    }
+  },
+  "apt": {
+    "debian": {
+      "snapshot": "20261002T000000Z",
+      "components": [
+        "backend"
+      ],
+      "releases": [
+        {
+          "url": "https://snapshot.debian.org/archive/debian/20261002T000000Z/dists/bookworm/InRelease",
+          "sha256": "77737fa4b34f2693e982cc9ee35736816c35a7778fc2d326cc1bbf5b301fe1aa"
+        },
+        {
+          "url": "https://snapshot.debian.org/archive/debian-security/20261002T000000Z/dists/bookworm-security/InRelease",
+          "sha256": "90272d04d6a4bf286a735f6ad782ca0863f40f2bfbd8e6bcf3580e22b09e7208"
+        }
+      ]
+    },
+    "ubuntu": {
+      "snapshot": "20261002T000000Z",
+      "components": [
+        "renderer"
+      ],
+      "releases": [
+        {
+          "url": "https://snapshot.ubuntu.com/ubuntu/20261002T000000Z/dists/noble/InRelease",
+          "sha256": "cdb2f31d809f589719a53c6ad15f255b27569c4059542ada282aaa21b8e164b0"
+        },
+        {
+          "url": "https://snapshot.ubuntu.com/ubuntu/20261002T000000Z/dists/noble-updates/InRelease",
+          "sha256": "112cee0fd4b717d7c54046bad450eae8334a95f9d7caf3b315a1fbfd70cbf07c"
+        },
+        {
+          "url": "https://snapshot.ubuntu.com/ubuntu/20261002T000000Z/dists/noble-security/InRelease",
+          "sha256": "7cd988092fc0b697b3160e009b2a9d9f66da2842e87e042a55dcfbbbb5d47fe9"
+        }
+      ]
+    }
+  },
+  "files": {
+    "deployment/scene/verify_runtime.py": {
+      "sha256": "4da130f1a0771573a2d8c20ad41b9080784cd30cbf1f8b8db91bdd56f1ea29e6",
+      "encoding": "lf",
+      "components": [
+        "backend",
+        "frontend",
+        "renderer"
+      ]
+    },
+    "deployment/scene/verify-apt.sh": {
+      "sha256": "ff41021d4c0e7edd82c6f888f8b42c79ddc4c689269d62760a0d20a6d48ce08c",
+      "encoding": "lf",
+      "components": [
+        "backend",
+        "frontend",
+        "renderer"
+      ]
+    },
+    "backend/Dockerfile.scene": {
+      "sha256": "4b5efcad29bd6ad7d0af5366a354163786273c31383aee38baae7cbcc0269998",
+      "encoding": "lf",
+      "components": [
+        "backend"
+      ]
+    },
+    "backend/Dockerfile.scene.dockerignore": {
+      "sha256": "720d93623b1ebd3cd3d213b525ad96cb67d82ad04d916bb2a4b010c528cbc103",
+      "encoding": "lf",
+      "components": [
+        "backend"
+      ]
+    },
+    "frontend/Dockerfile.scene": {
+      "sha256": "53c8fcca705f08f41ce80b55469cff56f948d91cb16de393ee0263ce2d95c104",
+      "encoding": "lf",
+      "components": [
+        "frontend"
+      ]
+    },
+    "frontend/Dockerfile.scene.dockerignore": {
+      "sha256": "ccd742d5bac662d0f6487b083cfc72277d801516d1230c172480e9d571116491",
+      "encoding": "lf",
+      "components": [
+        "frontend"
+      ]
+    },
+    "renderer/Dockerfile": {
+      "sha256": "4b2a06b34b0b3c3a2def1fee1f0a7bf658593f4b8275aed7271300398dd4161b",
+      "encoding": "lf",
+      "components": [
+        "renderer"
+      ]
+    },
+    "renderer/Dockerfile.dockerignore": {
+      "sha256": "ea4ff3858556d2acdb68c822c007a6b83582cc1510c684e2a1e9511ec4ec74b5",
+      "encoding": "lf",
+      "components": [
+        "renderer"
+      ]
+    },
+    "pyproject.toml": {
+      "sha256": "3396434d357a54f965cc3d7186600438e4f0a2089685411e72f3c144cd754ef3",
+      "encoding": "lf",
+      "components": [
+        "backend"
+      ]
+    },
+    "uv.lock": {
+      "sha256": "24b51c9ed7b55ec139bcb6877464f40dd831d5455848cdb7e39606af7305f390",
+      "encoding": "lf",
+      "components": [
+        "backend"
+      ]
+    },
+    "frontend/package.json": {
+      "sha256": "a02b0f79fefef1ef228dec17c691024337c38c04d1ddd449002ca032aa623bc6",
+      "encoding": "lf",
+      "components": [
+        "frontend"
+      ]
+    },
+    "frontend/package-lock.json": {
+      "sha256": "849b2b7356dfdbd670506f56142211b8baff618e480ac0fc3ad784cecd26b308",
+      "encoding": "lf",
+      "components": [
+        "frontend"
+      ]
+    },
+    "renderer/package.json": {
+      "sha256": "0ec2e213df5d84508af454d5087770feb40a98854ca2fd503729245d35ee77f6",
+      "encoding": "lf",
+      "components": [
+        "renderer"
+      ]
+    },
+    "renderer/package-lock.json": {
+      "sha256": "f0e2c20250cbd320c24bfc2943120f6bee98aa36d0629e767209cc7fe01e0e1f",
+      "encoding": "lf",
+      "components": [
+        "renderer"
+      ]
+    },
+    "renderer/requirements.lock.txt": {
+      "sha256": "8e1ab0661240cefdf75d1306b343d8263a2879821e54f1b6ebb7bf9978cda739",
+      "encoding": "lf",
+      "components": [
+        "renderer"
+      ]
+    },
+    "deployment/scene/check_browser.mjs": {
+      "sha256": "eb6ead8e11cef18731f1ca7e493977b6ee590c71ad3efed9b470b8b68966c51e",
+      "encoding": "lf",
+      "components": [
+        "renderer"
+      ]
+    },
+    "deployment/scene/debian.sources": {
+      "sha256": "e6430c31b7b96b8e8b1961826253ac90b3e0bb80d6ebb352c1e8747a6c09dd53",
+      "encoding": "lf",
+      "components": [
+        "backend"
+      ]
+    },
+    "deployment/scene/debian.inrelease-sha256": {
+      "sha256": "80a40c0e622d43356c4c9e8bd26444bbfb62661ef49fa40d2e081ccbde84e717",
+      "encoding": "lf",
+      "components": [
+        "backend"
+      ]
+    },
+    "deployment/scene/ubuntu.sources": {
+      "sha256": "d1ee220c6ec491d8a7262a5904089b1eea10937db176f59a58948a6a3bda1c6a",
+      "encoding": "lf",
+      "components": [
+        "renderer"
+      ]
+    },
+    "deployment/scene/ubuntu.inrelease-sha256": {
+      "sha256": "b2fc2a422791e2079f2b83068012d557bc2ac3777ce51e34a9d380524e657000",
+      "encoding": "lf",
+      "components": [
+        "renderer"
+      ]
+    },
+    "backend/fonts/manifest.json": {
+      "sha256": "53b236c51499ab7b28405d9988137fc3ac4fc27295d1474e56f282d805d1f6b0",
+      "encoding": "lf",
+      "components": [
+        "backend",
+        "renderer"
+      ]
+    },
+    "backend/fonts/NotoSansSC-Regular.ttf": {
+      "sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b",
+      "encoding": "binary",
+      "components": [
+        "backend",
+        "renderer"
+      ]
+    },
+    "renderer/smoke.pptx": {
+      "sha256": "3acc9633333587c78afae8539908c98df59556482a752b53ae7b34b2cbb19040",
+      "encoding": "binary",
+      "components": [
+        "renderer"
+      ]
+    },
+    "frontend/nginx.scene.conf": {
+      "sha256": "1f16575323de9e4a4312b5f991c929d5b0128ef44f75fa5c223e1fca09237e72",
+      "encoding": "lf",
+      "components": [
+        "frontend"
+      ]
+    }
+  }
+}

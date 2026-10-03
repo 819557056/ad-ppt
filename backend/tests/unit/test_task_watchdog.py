@@ -590,15 +590,27 @@ def test_instance_lock_blocks_a_second_process(app):
     from app import _acquire_instance_lock
 
     lock_path = os.path.join(app.config['UPLOAD_FOLDER'], '.backend-instance.lock')
-    script = textwrap.dedent(
-        f"""
-        import fcntl, time
-        handle = open(r"{lock_path}", 'a+')
-        fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
-        print('locked', flush=True)
-        time.sleep(10)
-        """
-    )
+    if os.name == 'nt':
+        script = textwrap.dedent(
+            f"""
+            import msvcrt, time
+            handle = open(r"{lock_path}", 'a+')
+            handle.seek(0)
+            msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)
+            print('locked', flush=True)
+            time.sleep(10)
+            """
+        )
+    else:
+        script = textwrap.dedent(
+            f"""
+            import fcntl, time
+            handle = open(r"{lock_path}", 'a+')
+            fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+            print('locked', flush=True)
+            time.sleep(10)
+            """
+        )
     holder = subprocess.Popen(
         [sys.executable, '-c', script], stdout=subprocess.PIPE, text=True
     )

@@ -38,6 +38,10 @@ dependencies = [
     "PyJWT>=2.8.0",
     "PyPDF2>=3.0.0",
     "PyMuPDF>=1.24.0",
+    "cryptography>=42.0.0",
+    "defusedxml>=0.7.1",
+    "fonttools>=4.50.0",
+    "psycopg[binary]>=3.2.0",
     "edge-tts>=6.1.0",
     "socksio>=1.0.0",
     "opencv-python-headless>=4.13.0.92",
@@ -45,6 +49,8 @@ dependencies = [
     "onnxruntime>=1.18.0",
     "openai-codex==0.159.3",
     "openai-codex-cli-bin==0.159.3",
+    "pypdfium2>=5.13,<6",
+    "regex==2025.11.3",
 ]
 
 [project.optional-dependencies]

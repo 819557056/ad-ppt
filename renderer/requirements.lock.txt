@@ -1,0 +1,6 @@
+# Linux renderer wheels only. No source builds or unpinned transitive dependencies.
+PyMuPDF==1.27.1 \
+    --hash=sha256:2c9d9353b840040cbc724341f4095fb7e2cc1a12a9147d0ec1a0a79f5d773147 \
+    --hash=sha256:aeaed76e72cbc061149a825ab0811c5f4752970c56591c2938c5042ec06b26e1
+defusedxml==0.7.1 \
+    --hash=sha256:a352e7e428770286cc899e2542b6cdaedb2b4953ff269a210103ec58f6198a61

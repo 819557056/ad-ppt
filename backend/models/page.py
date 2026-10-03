@@ -15,6 +15,10 @@ class Page(db.Model):
     __tablename__ = 'pages'
     
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    head_revision_id = db.Column(db.String(36), nullable=True)
+    row_version = db.Column(db.BigInteger, nullable=False, default=0, server_default='0')
+    next_scene_seq = db.Column(db.BigInteger, nullable=False, default=1, server_default='1')
+    deleted_at = db.Column(db.DateTime(timezone=True), nullable=True)
     project_id = db.Column(db.String(36), db.ForeignKey('projects.id'), nullable=False)
     order_index = db.Column(db.Integer, nullable=False)
     part = db.Column(db.String(200), nullable=True)  # Optional section name

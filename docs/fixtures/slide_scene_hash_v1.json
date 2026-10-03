@@ -1,0 +1,64 @@
+{
+  "scene": {
+    "schema_version": 1,
+    "font_manifest_id": "fonts-v1",
+    "canvas": {
+      "width_pt": 960.0,
+      "height_pt": 540.0
+    },
+    "background": {
+      "kind": "solid",
+      "color": "#F8FAFC"
+    },
+    "elements": [
+      {
+        "id": "11111111-1111-4111-8111-111111111111",
+        "kind": "text",
+        "role": "title",
+        "frame": {
+          "x": 60.01,
+          "y": 50.0,
+          "w": 830.0,
+          "h": 65.0,
+          "rotation_deg": 0.0
+        },
+        "text": "季度工作汇报\n中文 English 😀",
+        "style": {
+          "font_family_id": "noto-sans-sc",
+          "font_size_pt": 34.0,
+          "font_weight": 700,
+          "color": "#17324D",
+          "align": "left",
+          "vertical_align": "top",
+          "line_height": 1.2,
+          "padding_pt": 0.0
+        },
+        "locked": false
+      },
+      {
+        "id": "22222222-2222-4222-8222-222222222222",
+        "kind": "image",
+        "role": "illustration",
+        "asset_id": "33333333-3333-4333-8333-333333333333",
+        "frame": {
+          "x": 580.0,
+          "y": 150.0,
+          "w": 320.0,
+          "h": 280.0,
+          "rotation_deg": 0.0
+        },
+        "crop": {
+          "x": 0.123456,
+          "y": 0.0,
+          "w": 0.876544,
+          "h": 1.0
+        },
+        "fit": "contain",
+        "opacity": 0.5,
+        "locked": false,
+        "alt_text": "团队协作"
+      }
+    ]
+  },
+  "sha256": "07a1dcb0130f0fd99b025ccaad7ea6f27a39726dbf6434a39e67914e7798c219"
+}

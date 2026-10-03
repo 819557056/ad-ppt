@@ -1,0 +1,453 @@
+{
+  "scene": {
+    "schema_version": 1,
+    "font_manifest_id": "fonts-v1",
+    "canvas": {
+      "width_pt": 960,
+      "height_pt": 540
+    },
+    "background": {
+      "kind": "solid",
+      "color": "#FFFFFF"
+    },
+    "elements": [
+      {
+        "id": "2abb9bc0-8a57-4a4d-b5fe-e0964f48412f",
+        "kind": "text",
+        "role": "body",
+        "text": "中文 English 123\n第二行继续文本",
+        "frame": {
+          "x": 20,
+          "y": 20,
+          "w": 130,
+          "h": 480,
+          "rotation_deg": 0
+        },
+        "style": {
+          "font_size_pt": 20,
+          "font_weight": 400,
+          "line_height": 1.2,
+          "padding_pt": 4,
+          "align": "left",
+          "vertical_align": "top",
+          "color": "#17324D"
+        }
+      },
+      {
+        "id": "ea4d6227-988e-41cc-9dea-5065a562cdb3",
+        "kind": "text",
+        "role": "body",
+        "text": "",
+        "frame": {
+          "x": 170,
+          "y": 20,
+          "w": 130,
+          "h": 480,
+          "rotation_deg": 0
+        },
+        "style": {
+          "font_size_pt": 20,
+          "font_weight": 700,
+          "line_height": 1.2,
+          "padding_pt": 4,
+          "align": "left",
+          "vertical_align": "middle",
+          "color": "#17324D"
+        }
+      },
+      {
+        "id": "476e0d02-0150-4a6d-936f-7eeac5d938d8",
+        "kind": "text",
+        "role": "body",
+        "text": "   ",
+        "frame": {
+          "x": 320,
+          "y": 20,
+          "w": 130,
+          "h": 480,
+          "rotation_deg": 0
+        },
+        "style": {
+          "font_size_pt": 20,
+          "font_weight": 400,
+          "line_height": 1.2,
+          "padding_pt": 4,
+          "align": "left",
+          "vertical_align": "bottom",
+          "color": "#17324D"
+        }
+      },
+      {
+        "id": "eca71a2c-acd1-4315-a115-bfdd23c37fef",
+        "kind": "text",
+        "role": "body",
+        "text": "\n",
+        "frame": {
+          "x": 470,
+          "y": 20,
+          "w": 130,
+          "h": 480,
+          "rotation_deg": 0
+        },
+        "style": {
+          "font_size_pt": 20,
+          "font_weight": 700,
+          "line_height": 1.2,
+          "padding_pt": 4,
+          "align": "left",
+          "vertical_align": "top",
+          "color": "#17324D"
+        }
+      },
+      {
+        "id": "e543c097-f87f-475f-be11-d686eb112e38",
+        "kind": "text",
+        "role": "body",
+        "text": "A\n\nB\n",
+        "frame": {
+          "x": 620,
+          "y": 20,
+          "w": 130,
+          "h": 480,
+          "rotation_deg": 0
+        },
+        "style": {
+          "font_size_pt": 20,
+          "font_weight": 400,
+          "line_height": 1.2,
+          "padding_pt": 4,
+          "align": "left",
+          "vertical_align": "middle",
+          "color": "#17324D"
+        }
+      },
+      {
+        "id": "ef788f2a-743b-4f74-8c48-4a381b94a3bb",
+        "kind": "text",
+        "role": "body",
+        "text": "Á🄀B 中文混排 Á🄀B 中文",
+        "frame": {
+          "x": 770,
+          "y": 20,
+          "w": 130,
+          "h": 480,
+          "rotation_deg": 0
+        },
+        "style": {
+          "font_size_pt": 20,
+          "font_weight": 700,
+          "line_height": 1.2,
+          "padding_pt": 4,
+          "align": "left",
+          "vertical_align": "bottom",
+          "color": "#17324D"
+        }
+      }
+    ]
+  },
+  "manifest": {
+    "canvas": {
+      "width_pt": 960,
+      "height_pt": 540
+    },
+    "pages": [
+      {
+        "page_id": "page",
+        "revision_id": "revision",
+        "scene_hash": "92401fb108db19eff0aea006637d183ae4fc87fab1911934cc895dfa535ff8cc"
+      }
+    ]
+  },
+  "layout": {
+    "schema_version": 1,
+    "engine": "chromium-143.0.7499.4",
+    "engine_identity": {
+      "chromium": "143.0.7499.4",
+      "node": "24.11.1",
+      "icu": "77.1",
+      "playwright": "1.57.0",
+      "script_sha256": "de9fd9c057e9c9b28951c425ec42e8366665292a5572d13c5da4e889eec68490",
+      "font_sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b"
+    },
+    "pages": [
+      {
+        "2abb9bc0-8a57-4a4d-b5fe-e0964f48412f": {
+          "source_length": 22,
+          "font_size_pt": 20.0,
+          "line_height_pt": 24.0,
+          "padding_pt": 4.0,
+          "lines": [
+            {
+              "start": 0,
+              "end": 11,
+              "break_kind": "soft",
+              "font_size_pt": 20.0,
+              "line_box": {
+                "x": 23.9883,
+                "y": 23.9883,
+                "w": 122.0039,
+                "h": 24.0
+              },
+              "baseline_pt": 44.2383
+            },
+            {
+              "start": 11,
+              "end": 14,
+              "break_kind": "hard",
+              "font_size_pt": 20.0,
+              "line_box": {
+                "x": 23.9883,
+                "y": 47.9883,
+                "w": 122.0039,
+                "h": 24.0
+              },
+              "baseline_pt": 68.2383
+            },
+            {
+              "start": 15,
+              "end": 21,
+              "break_kind": "soft",
+              "font_size_pt": 20.0,
+              "line_box": {
+                "x": 23.9883,
+                "y": 71.9883,
+                "w": 122.0039,
+                "h": 24.0
+              },
+              "baseline_pt": 92.2383
+            },
+            {
+              "start": 21,
+              "end": 22,
+              "break_kind": "end",
+              "font_size_pt": 20.0,
+              "line_box": {
+                "x": 23.9883,
+                "y": 95.9883,
+                "w": 122.0039,
+                "h": 24.0
+              },
+              "baseline_pt": 116.2383
+            }
+          ],
+          "resolved_fonts": [
+            {
+              "family_name": "Noto Sans CJK SC",
+              "postscript_name": "NotoSansCJKsc-Regular",
+              "is_custom_font": true,
+              "glyph_count": 21
+            }
+          ]
+        },
+        "ea4d6227-988e-41cc-9dea-5065a562cdb3": {
+          "source_length": 0,
+          "font_size_pt": 20.0,
+          "line_height_pt": 24.0,
+          "padding_pt": 4.0,
+          "lines": [
+            {
+              "start": 0,
+              "end": 0,
+              "break_kind": "end",
+              "font_size_pt": 20.0,
+              "line_box": {
+                "x": 173.9883,
+                "y": 247.9922,
+                "w": 122.0039,
+                "h": 24.0
+              },
+              "baseline_pt": 268.2422
+            }
+          ],
+          "resolved_fonts": []
+        },
+        "476e0d02-0150-4a6d-936f-7eeac5d938d8": {
+          "source_length": 3,
+          "font_size_pt": 20.0,
+          "line_height_pt": 24.0,
+          "padding_pt": 4.0,
+          "lines": [
+            {
+              "start": 0,
+              "end": 3,
+              "break_kind": "end",
+              "font_size_pt": 20.0,
+              "line_box": {
+                "x": 323.9883,
+                "y": 471.9961,
+                "w": 122.0039,
+                "h": 24.0
+              },
+              "baseline_pt": 492.2461
+            }
+          ],
+          "resolved_fonts": [
+            {
+              "family_name": "Noto Sans CJK SC",
+              "postscript_name": "NotoSansCJKsc-Regular",
+              "is_custom_font": true,
+              "glyph_count": 3
+            }
+          ]
+        },
+        "eca71a2c-acd1-4315-a115-bfdd23c37fef": {
+          "source_length": 1,
+          "font_size_pt": 20.0,
+          "line_height_pt": 24.0,
+          "padding_pt": 4.0,
+          "lines": [
+            {
+              "start": 0,
+              "end": 0,
+              "break_kind": "hard",
+              "font_size_pt": 20.0,
+              "line_box": {
+                "x": 473.9883,
+                "y": 23.9883,
+                "w": 122.0039,
+                "h": 24.0
+              },
+              "baseline_pt": 44.2383
+            },
+            {
+              "start": 1,
+              "end": 1,
+              "break_kind": "end",
+              "font_size_pt": 20.0,
+              "line_box": {
+                "x": 473.9883,
+                "y": 47.9883,
+                "w": 122.0039,
+                "h": 24.0
+              },
+              "baseline_pt": 68.2383
+            }
+          ],
+          "resolved_fonts": []
+        },
+        "e543c097-f87f-475f-be11-d686eb112e38": {
+          "source_length": 5,
+          "font_size_pt": 20.0,
+          "line_height_pt": 24.0,
+          "padding_pt": 4.0,
+          "lines": [
+            {
+              "start": 0,
+              "end": 1,
+              "break_kind": "hard",
+              "font_size_pt": 20.0,
+              "line_box": {
+                "x": 623.9883,
+                "y": 211.9922,
+                "w": 122.0039,
+                "h": 24.0
+              },
+              "baseline_pt": 232.2422
+            },
+            {
+              "start": 2,
+              "end": 2,
+              "break_kind": "hard",
+              "font_size_pt": 20.0,
+              "line_box": {
+                "x": 623.9883,
+                "y": 235.9922,
+                "w": 122.0039,
+                "h": 24.0
+              },
+              "baseline_pt": 256.2422
+            },
+            {
+              "start": 3,
+              "end": 4,
+              "break_kind": "hard",
+              "font_size_pt": 20.0,
+              "line_box": {
+                "x": 623.9883,
+                "y": 259.9922,
+                "w": 122.0039,
+                "h": 24.0
+              },
+              "baseline_pt": 280.2422
+            },
+            {
+              "start": 5,
+              "end": 5,
+              "break_kind": "end",
+              "font_size_pt": 20.0,
+              "line_box": {
+                "x": 623.9883,
+                "y": 283.9922,
+                "w": 122.0039,
+                "h": 24.0
+              },
+              "baseline_pt": 304.2422
+            }
+          ],
+          "resolved_fonts": [
+            {
+              "family_name": "Noto Sans CJK SC",
+              "postscript_name": "NotoSansCJKsc-Regular",
+              "is_custom_font": true,
+              "glyph_count": 2
+            }
+          ]
+        },
+        "ef788f2a-743b-4f74-8c48-4a381b94a3bb": {
+          "source_length": 17,
+          "font_size_pt": 20.0,
+          "line_height_pt": 24.0,
+          "padding_pt": 4.0,
+          "lines": [
+            {
+              "start": 0,
+              "end": 8,
+              "break_kind": "soft",
+              "font_size_pt": 20.0,
+              "line_box": {
+                "x": 773.9883,
+                "y": 447.9961,
+                "w": 122.0039,
+                "h": 24.0
+              },
+              "baseline_pt": 468.2461
+            },
+            {
+              "start": 8,
+              "end": 17,
+              "break_kind": "end",
+              "font_size_pt": 20.0,
+              "line_box": {
+                "x": 773.9883,
+                "y": 471.9961,
+                "w": 122.0039,
+                "h": 24.0
+              },
+              "baseline_pt": 492.2461
+            }
+          ],
+          "resolved_fonts": [
+            {
+              "family_name": "Noto Sans CJK SC",
+              "postscript_name": "NotoSansCJKsc-Regular",
+              "is_custom_font": true,
+              "glyph_count": 15
+            }
+          ]
+        }
+      }
+    ],
+    "scene_hashes": [
+      "92401fb108db19eff0aea006637d183ae4fc87fab1911934cc895dfa535ff8cc"
+    ],
+    "font_manifest_hash": "add8e1da2f6e663092b3b4241157e14c7c1c85447532605ee63e6ced75c11c2e",
+    "layout_engine_version": "aa5e256e25a04cf0fafd8ef1ce3d1972653949a9e26fcc8d37ffed7732e18acd"
+  },
+  "provenance": {
+    "rendered_pdf_sha256": "d19ec2b18361b2241af0c00901b5494d61326c5254b9f982f8d9d5ad78cbd06b",
+    "source_pptx_sha256": "9d1010c11c8148851b61175671226c6e5b7da940609979538d05747ec5dc4736",
+    "renderer_image_id": "sha256:62e25a5fd576d5753b24da1674a18ac1ca99b13a052a61e928d5e5bbc350860c",
+    "kind": "actual locked LibreOffice render of synthetic six-text-box PPTX; not Chromium PDF",
+    "purpose": "Unicode, preserved real spaces, empty paragraphs, line breaks, bottom/middle/top alignment and actual glyph bounds"
+  }
+}

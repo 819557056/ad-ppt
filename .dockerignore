@@ -99,3 +99,11 @@ build/
 *.pptx
 *.pdf
 !frontend/public/**
+
+# Private Scene state and QA artifacts are never build inputs, including legacy builds.
+**/instance/
+scene_assets/
+tmp/
+**/.env*
+**/*.pem
+**/*.key

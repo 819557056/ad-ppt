@@ -52,6 +52,15 @@ def repair_desktop_settings_schema(db):
             'updated_at': 'DATETIME',
         },
         'projects': {
+            'owner_id': 'VARCHAR(36)',
+            'editor_mode': "VARCHAR(20) NOT NULL DEFAULT 'legacy_image'",
+            'row_version': 'BIGINT NOT NULL DEFAULT 0',
+            'canvas_width_pt': 'NUMERIC(10,2)',
+            'canvas_height_pt': 'NUMERIC(10,2)',
+            'font_manifest_id': 'VARCHAR(64)',
+            'active_plan_id': 'VARCHAR(36)',
+            'model_config_json': "TEXT NOT NULL DEFAULT '{}'",
+            'deleted_at': 'DATETIME',
             'project_title': 'VARCHAR(255)',
             'outline_requirements': 'TEXT',
             'description_requirements': 'TEXT',
@@ -64,6 +73,10 @@ def repair_desktop_settings_schema(db):
             'image_aspect_ratio': "VARCHAR(10) DEFAULT '16:9'",
         },
         'pages': {
+            'head_revision_id': 'VARCHAR(36)',
+            'row_version': 'BIGINT NOT NULL DEFAULT 0',
+            'next_scene_seq': 'BIGINT NOT NULL DEFAULT 1',
+            'deleted_at': 'DATETIME',
             'cached_image_path': 'VARCHAR(500)',
             'narration_text': 'TEXT',
             'template_asset_id': 'VARCHAR(36)',
@@ -89,6 +102,37 @@ def repair_desktop_settings_schema(db):
         'user_style_templates': {
             'color': 'VARCHAR(20)',
         },
+        'project_template_assets': {
+            'template_document_id': 'VARCHAR(36)',
+            'preview_asset_id': 'VARCHAR(36)',
+            'thumbnail_asset_id': 'VARCHAR(36)',
+            'analysis_schema_version': 'INTEGER',
+            'analysis_revision': 'INTEGER NOT NULL DEFAULT 0',
+            'analysis_hash': 'VARCHAR(64)',
+            'deleted_at': 'DATETIME',
+        },
+        'template_documents': {
+            'selected_page_indexes_json': "TEXT NOT NULL DEFAULT '[]'",
+            'import_task_id': 'VARCHAR(36)',
+            'error_code': 'VARCHAR(80)',
+            'error_details': 'TEXT',
+        },
+        'scene_task_items': {
+            'page_id': 'VARCHAR(36)',
+            'credential_id': 'VARCHAR(36)',
+            'logical_key': 'VARCHAR(120)',
+            'group_id': 'VARCHAR(36)',
+            'max_attempts': 'INTEGER NOT NULL DEFAULT 2',
+            'dispatch_state': "VARCHAR(24) NOT NULL DEFAULT 'not_sent'",
+            'next_run_at': 'DATETIME',
+            'cancel_requested_at': 'DATETIME',
+            'updated_at': 'DATETIME',
+        },
+        'scene_exports': {
+            'review_report_sha256': 'VARCHAR(64)',
+            'reviewed_by': 'VARCHAR(36)',
+            'reviewed_at': 'DATETIME',
+        },
     }
 
     repaired = {}
@@ -113,6 +157,17 @@ def repair_desktop_settings_schema(db):
                 'UPDATE settings SET baidu_api_key = baidu_ocr_api_key '
                 'WHERE baidu_api_key IS NULL AND baidu_ocr_api_key IS NOT NULL'
             ))
+        if 'updated_at' in repaired.get('scene_task_items', []):
+            conn.execute(text('UPDATE scene_task_items SET updated_at = CURRENT_TIMESTAMP '
+                              'WHERE updated_at IS NULL'))
+        if 'principals' in existing_tables and 'projects' in existing_tables:
+            local_owner = '00000000-0000-4000-8000-000000000001'
+            conn.execute(text('INSERT OR IGNORE INTO principals '
+                '(id, kind, display_name, status, created_at) '
+                "VALUES (:id, 'local_owner', 'Local owner', 'active', CURRENT_TIMESTAMP)"),
+                {'id': local_owner})
+            conn.execute(text('UPDATE projects SET owner_id = :id WHERE owner_id IS NULL'),
+                {'id': local_owner})
 
     if repaired:
         details = '; '.join(f"{table}: {', '.join(columns)}" for table, columns in repaired.items())

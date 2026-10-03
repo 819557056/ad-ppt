@@ -1,0 +1,9 @@
+# Linux Scene build/maintenance entrypoints must retain LF on Windows checkouts.
+deployment/scene/* text eol=lf
+backend/Dockerfile.scene* text eol=lf
+frontend/Dockerfile.scene* text eol=lf
+renderer/Dockerfile* text eol=lf
+renderer/package*.json text eol=lf
+renderer/requirements.lock.txt text eol=lf
+scripts/scene-*.sh text eol=lf
+frontend/nginx.scene.conf text eol=lf

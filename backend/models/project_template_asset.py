@@ -25,6 +25,13 @@ class ProjectTemplateAsset(db.Model):
     source = db.Column(db.String(20), nullable=False, default='upload')
     source_pdf_id = db.Column(db.String(36), nullable=True)
     source_page_index = db.Column(db.Integer, nullable=True)
+    template_document_id = db.Column(db.String(36), db.ForeignKey('template_documents.id'), nullable=True)
+    preview_asset_id = db.Column(db.String(36), db.ForeignKey('assets.id'), nullable=True)
+    thumbnail_asset_id = db.Column(db.String(36), db.ForeignKey('assets.id'), nullable=True)
+    analysis_schema_version = db.Column(db.Integer, nullable=True)
+    analysis_revision = db.Column(db.Integer, nullable=False, default=0, server_default='0')
+    analysis_hash = db.Column(db.String(64), nullable=True)
+    deleted_at = db.Column(db.DateTime(timezone=True), nullable=True)
 
     analysis_status = db.Column(db.String(20), nullable=False, default='pending')
     analysis_json = db.Column(db.Text, nullable=True)

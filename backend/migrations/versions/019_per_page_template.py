@@ -52,7 +52,7 @@ def upgrade():
         sa.Column('analysis_notes', sa.Text(), nullable=True),
         sa.Column('analysis_error', sa.Text(), nullable=True),
         sa.Column('user_label', sa.String(length=200), nullable=True),
-        sa.Column('user_edited_analysis', sa.Boolean(), nullable=False, server_default=sa.text('0')),
+        sa.Column('user_edited_analysis', sa.Boolean(), nullable=False, server_default=sa.false()),
         sa.Column('sort_order', sa.Integer(), nullable=False, server_default='0'),
         sa.Column('created_at', sa.DateTime(), nullable=False, server_default=sa.func.current_timestamp()),
         sa.Column('updated_at', sa.DateTime(), nullable=False, server_default=sa.func.current_timestamp()),
@@ -110,7 +110,7 @@ def upgrade():
                         'INSERT INTO project_template_assets '
                         '(id, project_id, image_path, source, analysis_status, '
                         ' user_edited_analysis, sort_order, created_at, updated_at) '
-                        'VALUES (:id, :pid, :ipath, :src, :st, 0, 0, :ts, :ts)'
+                        'VALUES (:id, :pid, :ipath, :src, :st, :edited, 0, :ts, :ts)'
                     ),
                     {
                         'id': asset_id,
@@ -118,6 +118,7 @@ def upgrade():
                         'ipath': tpl_image_path,
                         'src': 'upload',
                         'st': 'pending',
+                        'edited': False,
                         'ts': now,
                     },
                 )

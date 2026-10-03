@@ -48,8 +48,9 @@ def _generate_image_caption(filepath: str) -> str:
     try:
         from PIL import Image
 
-        image = Image.open(filepath)
-        image.thumbnail((1024, 1024), Image.Resampling.LANCZOS)
+        with Image.open(filepath) as source_image:
+            source_image.thumbnail((1024, 1024), Image.Resampling.LANCZOS)
+            image = source_image.copy()
 
         output_lang = current_app.config.get('OUTPUT_LANGUAGE', 'zh')
         if output_lang == 'en':
@@ -275,7 +276,7 @@ def _save_material_file(file, target_project_id: Optional[str]):
     filepath = materials_dir / unique_filename
     file.save(str(filepath))
 
-    relative_path = str(filepath.relative_to(file_service.upload_folder))
+    relative_path = filepath.relative_to(file_service.upload_folder).as_posix()
     if target_project_id:
         image_url = file_service.get_file_url(target_project_id, 'materials', unique_filename)
     else:

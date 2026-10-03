@@ -11,6 +11,8 @@ import { OutlineEditor } from './pages/OutlineEditor';
 import { DetailEditor } from './pages/DetailEditor';
 import { TemplateSetupPage } from './pages/TemplateSetupPage';
 import { SlidePreview } from './pages/SlidePreview';
+import { SceneEditorPage } from './pages/SceneEditorPage';
+import { SceneProjectsPage } from './pages/SceneProjectsPage';
 import { SettingsPage } from './pages/Settings';
 import { useProjectStore } from './store/useProjectStore';
 import { useToast, AccessCodeGuard, DesktopTitleBar, UpdateChecker } from './components/shared';
@@ -63,6 +65,8 @@ function App() {
                   <Route path="/project/:projectId/detail" element={<DetailEditor />} />
                   <Route path="/project/:projectId/template-setup" element={<TemplateSetupPage />} />
                   <Route path="/project/:projectId/preview" element={<SlidePreview />} />
+                  <Route path="/scene" element={<SceneProjectsPage />} />
+                  <Route path="/projects/:id/editor" element={<SceneEditorPage />} />
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
                 <ToastContainer />

@@ -1,0 +1,8 @@
+{
+  "name": "banana-scene-renderer",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "playwright": "1.57.0"
+  }
+}

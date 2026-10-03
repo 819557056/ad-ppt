@@ -29,13 +29,44 @@ class Config:
     
     # SQLite线程安全配置 - 关键修复
     SQLALCHEMY_ENGINE_OPTIONS = {
-        'connect_args': {
-            'check_same_thread': False,  # 允许跨线程使用（仅SQLite）
-            'timeout': 30  # 增加超时时间
-        },
-        'pool_pre_ping': True,  # 连接前检查
-        'pool_recycle': 3600,  # 1小时回收连接
+        'pool_pre_ping': True,
+        'pool_recycle': 3600,
+        **({'connect_args': {'check_same_thread': False, 'timeout': 30}}
+           if SQLALCHEMY_DATABASE_URI.startswith('sqlite:') else {}),
     }
+    SCENE_EDITOR_ENABLED = os.getenv('SCENE_EDITOR_ENABLED', 'false').lower() == 'true'
+    ASSET_STORE_ROOT = os.getenv('ASSET_STORE_ROOT', os.path.join(PROJECT_ROOT, 'scene_assets'))
+    MAX_GENERATED_PAGES = int(os.getenv('MAX_GENERATED_PAGES', '30'))
+    MAX_UPLOAD_BYTES = int(os.getenv('MAX_UPLOAD_BYTES', str(50 * 1024 * 1024)))
+    MODEL_GATEWAY_ALLOWLIST = os.getenv('MODEL_GATEWAY_ALLOWLIST', '')
+    CREDENTIAL_ENCRYPTION_KEY = os.getenv('CREDENTIAL_ENCRYPTION_KEY', '')
+    CREDENTIAL_ENCRYPTION_KEY_ID = os.getenv('CREDENTIAL_ENCRYPTION_KEY_ID', 'v1')
+    OWNER_MODEL_CONCURRENCY = int(os.getenv('OWNER_MODEL_CONCURRENCY', '2'))
+    SCENE_STORAGE_QUOTA_BYTES = int(os.getenv('SCENE_STORAGE_QUOTA_BYTES', str(20 * 1024 ** 3)))
+    OWNER_STORAGE_QUOTA_BYTES = int(os.getenv('OWNER_STORAGE_QUOTA_BYTES', str(5 * 1024 ** 3)))
+    SCENE_STORAGE_LOCK_SECONDS = int(os.getenv('SCENE_STORAGE_LOCK_SECONDS', '10'))
+    SCENE_STORAGE_MAX_ENTRIES = int(os.getenv('SCENE_STORAGE_MAX_ENTRIES', '200000'))
+    # Only consumed by the explicitly offline retention command; never an automatic GC.
+    SCENE_RETENTION_CANDIDATE_DAYS = int(os.getenv('SCENE_RETENTION_CANDIDATE_DAYS', '30'))
+    SCENE_RETENTION_TASK_DAYS = int(os.getenv('SCENE_RETENTION_TASK_DAYS', '90'))
+    SCENE_RETENTION_ATTEMPT_DAYS = int(os.getenv('SCENE_RETENTION_ATTEMPT_DAYS', '180'))
+    SCENE_RETENTION_ASSET_DAYS = int(os.getenv('SCENE_RETENTION_ASSET_DAYS', '30'))
+    SCENE_RETENTION_ORPHAN_HOURS = int(os.getenv('SCENE_RETENTION_ORPHAN_HOURS', '24'))
+    SCENE_QUEUE_CAPACITY_UNITS = int(os.getenv('SCENE_QUEUE_CAPACITY_UNITS', '1024'))
+    OWNER_QUEUE_CAPACITY_UNITS = int(os.getenv('OWNER_QUEUE_CAPACITY_UNITS', '256'))
+    MAX_TEMPLATE_PAGES = int(os.getenv('MAX_TEMPLATE_PAGES', '50'))
+    MAX_UNPACKED_BYTES = int(os.getenv('MAX_UNPACKED_BYTES', str(500 * 1024 * 1024)))
+    SCENE_RENDER_JOB_ROOT = os.getenv('SCENE_RENDER_JOB_ROOT', '')
+    # The isolated renderer runs as a different UID in docker-compose.scene.yml.
+    SCENE_RENDER_UID = int(os.getenv('SCENE_RENDER_UID', '-1'))
+    SCENE_RENDER_GID = int(os.getenv('SCENE_RENDER_GID', '-1'))
+    SCENE_RENDER_UNIQUE_UID = os.getenv('SCENE_RENDER_UNIQUE_UID', 'false').lower() == 'true'
+    SCENE_RENDER_UID_BASE = int(os.getenv('SCENE_RENDER_UID_BASE', '10000'))
+    RENDER_TIMEOUT_SECONDS = int(os.getenv('RENDER_TIMEOUT_SECONDS', '180'))
+    SCENE_LEASE_SECONDS = int(os.getenv('SCENE_LEASE_SECONDS', '60'))
+    SCENE_HEARTBEAT_SECONDS = int(os.getenv('SCENE_HEARTBEAT_SECONDS', '10'))
+    SCENE_READY_HEARTBEAT_SECONDS = int(os.getenv('SCENE_READY_HEARTBEAT_SECONDS', '30'))
+    SCENE_MIN_FREE_BYTES = int(os.getenv('SCENE_MIN_FREE_BYTES', str(100 * 1024 * 1024)))
     
     # 文件存储配置
     UPLOAD_FOLDER = os.path.join(PROJECT_ROOT, 'uploads')

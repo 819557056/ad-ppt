@@ -2,6 +2,8 @@ import importlib
 import logging
 import hashlib
 
+import pytest
+
 
 def _reload_app_module():
     config_module = importlib.import_module('config')
@@ -43,7 +45,7 @@ def test_create_app_accepts_relative_database_path_env(monkeypatch, tmp_path):
 
     flask_app = app_module.create_app()
 
-    assert flask_app.config['SQLALCHEMY_DATABASE_URI'] == f"sqlite:///{tmp_path / 'desktop.db'}"
+    assert flask_app.config['SQLALCHEMY_DATABASE_URI'] == f"sqlite:///{(tmp_path / 'desktop.db').as_posix()}"
 
 
 def test_create_app_prefers_database_path_over_database_url(monkeypatch, tmp_path):
@@ -57,7 +59,7 @@ def test_create_app_prefers_database_path_over_database_url(monkeypatch, tmp_pat
 
     flask_app = app_module.create_app()
 
-    assert flask_app.config['SQLALCHEMY_DATABASE_URI'] == f"sqlite:///{db_path}"
+    assert flask_app.config['SQLALCHEMY_DATABASE_URI'] == f"sqlite:///{db_path.as_posix()}"
 
 
 def test_create_app_defaults_werkzeug_log_level_to_info(monkeypatch, tmp_path):
@@ -182,3 +184,18 @@ def test_config_default_cors_matches_new_frontend_port(monkeypatch):
     config_module = importlib.reload(config_module)
 
     assert config_module.Config.CORS_ORIGINS == ['http://localhost:3011']
+
+
+
+@pytest.mark.parametrize('container,environment,expected', [
+    ('1', None, False), ('1', 'development', False), ('1', 'production', False),
+    ('0', 'development', True), ('0', 'production', False),
+])
+def test_container_entrypoint_never_enables_debugger_or_reloader(monkeypatch, container, environment, expected):
+    from app import _server_debug_enabled
+    monkeypatch.setenv('IN_DOCKER', container)
+    if environment is None:
+        monkeypatch.delenv('FLASK_ENV', raising=False)
+    else:
+        monkeypatch.setenv('FLASK_ENV', environment)
+    assert _server_debug_enabled() is expected

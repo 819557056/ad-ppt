@@ -1,0 +1,418 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "Canvas": {
+      "additionalProperties": false,
+      "properties": {
+        "width_pt": {
+          "exclusiveMinimum": 0,
+          "maximum": 2880,
+          "title": "Width Pt",
+          "type": "number"
+        },
+        "height_pt": {
+          "exclusiveMinimum": 0,
+          "maximum": 2880,
+          "title": "Height Pt",
+          "type": "number"
+        }
+      },
+      "required": [
+        "width_pt",
+        "height_pt"
+      ],
+      "title": "Canvas",
+      "type": "object"
+    },
+    "Crop": {
+      "additionalProperties": false,
+      "properties": {
+        "x": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "X",
+          "type": "number"
+        },
+        "y": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Y",
+          "type": "number"
+        },
+        "w": {
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "title": "W",
+          "type": "number"
+        },
+        "h": {
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "title": "H",
+          "type": "number"
+        }
+      },
+      "required": [
+        "x",
+        "y",
+        "w",
+        "h"
+      ],
+      "title": "Crop",
+      "type": "object"
+    },
+    "Frame": {
+      "additionalProperties": false,
+      "properties": {
+        "x": {
+          "maximum": 2880,
+          "minimum": -2880,
+          "title": "X",
+          "type": "number"
+        },
+        "y": {
+          "maximum": 2880,
+          "minimum": -2880,
+          "title": "Y",
+          "type": "number"
+        },
+        "w": {
+          "exclusiveMinimum": 0,
+          "maximum": 2880,
+          "title": "W",
+          "type": "number"
+        },
+        "h": {
+          "exclusiveMinimum": 0,
+          "maximum": 2880,
+          "title": "H",
+          "type": "number"
+        },
+        "rotation_deg": {
+          "maximum": 180,
+          "minimum": -180,
+          "title": "Rotation Deg",
+          "type": "number"
+        }
+      },
+      "required": [
+        "x",
+        "y",
+        "w",
+        "h",
+        "rotation_deg"
+      ],
+      "title": "Frame",
+      "type": "object"
+    },
+    "ImageBackground": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "image",
+          "title": "Kind",
+          "type": "string"
+        },
+        "asset_id": {
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "crop": {
+          "$ref": "#/$defs/Crop",
+          "default": {
+            "x": 0.0,
+            "y": 0.0,
+            "w": 1.0,
+            "h": 1.0
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "asset_id"
+      ],
+      "title": "ImageBackground",
+      "type": "object"
+    },
+    "ImageElement": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "image",
+          "title": "Kind",
+          "type": "string"
+        },
+        "role": {
+          "enum": [
+            "illustration",
+            "chart",
+            "icon",
+            "photo",
+            "decoration"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "asset_id": {
+          "title": "Asset Id",
+          "type": "string"
+        },
+        "frame": {
+          "$ref": "#/$defs/Frame"
+        },
+        "crop": {
+          "$ref": "#/$defs/Crop",
+          "default": {
+            "x": 0.0,
+            "y": 0.0,
+            "w": 1.0,
+            "h": 1.0
+          }
+        },
+        "fit": {
+          "default": "contain",
+          "enum": [
+            "contain",
+            "cover"
+          ],
+          "title": "Fit",
+          "type": "string"
+        },
+        "opacity": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Opacity",
+          "type": "number"
+        },
+        "locked": {
+          "default": false,
+          "title": "Locked",
+          "type": "boolean"
+        },
+        "alt_text": {
+          "default": "",
+          "maxLength": 500,
+          "title": "Alt Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "role",
+        "asset_id",
+        "frame",
+        "opacity"
+      ],
+      "title": "ImageElement",
+      "type": "object"
+    },
+    "SolidBackground": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "solid",
+          "title": "Kind",
+          "type": "string"
+        },
+        "color": {
+          "title": "Color",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "color"
+      ],
+      "title": "SolidBackground",
+      "type": "object"
+    },
+    "TextElement": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "text",
+          "title": "Kind",
+          "type": "string"
+        },
+        "role": {
+          "enum": [
+            "title",
+            "body",
+            "annotation"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "frame": {
+          "$ref": "#/$defs/Frame"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "style": {
+          "$ref": "#/$defs/TextStyle"
+        },
+        "locked": {
+          "default": false,
+          "title": "Locked",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "role",
+        "frame",
+        "text",
+        "style"
+      ],
+      "title": "TextElement",
+      "type": "object"
+    },
+    "TextStyle": {
+      "additionalProperties": false,
+      "properties": {
+        "font_family_id": {
+          "const": "noto-sans-sc",
+          "default": "noto-sans-sc",
+          "title": "Font Family Id",
+          "type": "string"
+        },
+        "font_size_pt": {
+          "maximum": 96,
+          "minimum": 6,
+          "title": "Font Size Pt",
+          "type": "number"
+        },
+        "font_weight": {
+          "default": 400,
+          "enum": [
+            400,
+            700
+          ],
+          "title": "Font Weight",
+          "type": "integer"
+        },
+        "color": {
+          "title": "Color",
+          "type": "string"
+        },
+        "align": {
+          "default": "left",
+          "enum": [
+            "left",
+            "center",
+            "right"
+          ],
+          "title": "Align",
+          "type": "string"
+        },
+        "vertical_align": {
+          "default": "top",
+          "enum": [
+            "top",
+            "middle",
+            "bottom"
+          ],
+          "title": "Vertical Align",
+          "type": "string"
+        },
+        "line_height": {
+          "maximum": 3,
+          "minimum": 0.8,
+          "title": "Line Height",
+          "type": "number"
+        },
+        "padding_pt": {
+          "maximum": 48,
+          "minimum": 0,
+          "title": "Padding Pt",
+          "type": "number"
+        }
+      },
+      "required": [
+        "font_size_pt",
+        "color",
+        "line_height",
+        "padding_pt"
+      ],
+      "title": "TextStyle",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "font_manifest_id": {
+      "const": "fonts-v1",
+      "title": "Font Manifest Id",
+      "type": "string"
+    },
+    "canvas": {
+      "$ref": "#/$defs/Canvas"
+    },
+    "background": {
+      "discriminator": {
+        "mapping": {
+          "image": "#/$defs/ImageBackground",
+          "solid": "#/$defs/SolidBackground"
+        },
+        "propertyName": "kind"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/SolidBackground"
+        },
+        {
+          "$ref": "#/$defs/ImageBackground"
+        }
+      ],
+      "title": "Background"
+    },
+    "elements": {
+      "items": {
+        "discriminator": {
+          "mapping": {
+            "image": "#/$defs/ImageElement",
+            "text": "#/$defs/TextElement"
+          },
+          "propertyName": "kind"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/$defs/TextElement"
+          },
+          {
+            "$ref": "#/$defs/ImageElement"
+          }
+        ]
+      },
+      "maxItems": 200,
+      "title": "Elements",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "font_manifest_id",
+    "canvas",
+    "background",
+    "elements"
+  ],
+  "title": "SlideScene",
+  "type": "object"
+}

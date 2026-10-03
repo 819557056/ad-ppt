@@ -863,6 +863,11 @@ export const Home: React.FC = () => {
               <span className="hidden sm:inline">{t('nav.history')}</span>
               <span className="sm:hidden">{t('nav.history')}</span>
             </Button>)}
+            {!isPublicDemo && <Button variant="ghost" size="sm" icon={<FileEdit size={17} />}
+              onClick={() => navigate('/scene')}
+              className="text-xs md:text-sm hover:bg-banana-100/60 font-medium">
+              <span className="hidden md:inline">对象编辑器</span>
+            </Button>}
             <Button
               variant="ghost"
               size="sm"

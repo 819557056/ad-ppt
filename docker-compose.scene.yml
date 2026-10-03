@@ -1,0 +1,112 @@
+# Native Scene deployment. Put TLS/restricted access in front of the loopback web port.
+services:
+  postgres:
+    image: postgres:16.6@sha256:557fea37a744d5f4c8faab304b0a90858b53ab119735a88c131fd19dab802f36
+    environment:
+      POSTGRES_DB: banana_scene
+      POSTGRES_USER: banana_scene
+      POSTGRES_PASSWORD: ${SCENE_POSTGRES_PASSWORD:?set SCENE_POSTGRES_PASSWORD}
+    volumes:
+      - scene-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U banana_scene -d banana_scene"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks: [private]
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile.scene
+    environment: &scene-env
+      DATABASE_URL: ${SCENE_DATABASE_URL:?set SCENE_DATABASE_URL}
+      SECRET_KEY: ${SECRET_KEY:?set SECRET_KEY}
+      ACCESS_CODE: ${ACCESS_CODE:?set ACCESS_CODE}
+      SCENE_EDITOR_ENABLED: 'true'
+      ASSET_STORE_ROOT: /app/scene_assets
+      SCENE_QUEUE_CAPACITY_UNITS: ${SCENE_QUEUE_CAPACITY_UNITS:-1024}
+      OWNER_QUEUE_CAPACITY_UNITS: ${OWNER_QUEUE_CAPACITY_UNITS:-256}
+      SCENE_STORAGE_QUOTA_BYTES: ${SCENE_STORAGE_QUOTA_BYTES:-21474836480}
+      OWNER_STORAGE_QUOTA_BYTES: ${OWNER_STORAGE_QUOTA_BYTES:-5368709120}
+      SCENE_STORAGE_LOCK_SECONDS: ${SCENE_STORAGE_LOCK_SECONDS:-10}
+      SCENE_STORAGE_MAX_ENTRIES: ${SCENE_STORAGE_MAX_ENTRIES:-200000}
+      SCENE_RETENTION_CANDIDATE_DAYS: ${SCENE_RETENTION_CANDIDATE_DAYS:-30}
+      SCENE_RETENTION_TASK_DAYS: ${SCENE_RETENTION_TASK_DAYS:-90}
+      SCENE_RETENTION_ATTEMPT_DAYS: ${SCENE_RETENTION_ATTEMPT_DAYS:-180}
+      SCENE_RETENTION_ASSET_DAYS: ${SCENE_RETENTION_ASSET_DAYS:-30}
+      SCENE_RETENTION_ORPHAN_HOURS: ${SCENE_RETENTION_ORPHAN_HOURS:-24}
+      SCENE_MIN_FREE_BYTES: ${SCENE_MIN_FREE_BYTES:-104857600}
+      SCENE_RENDER_JOB_ROOT: /jobs
+      SCENE_RENDER_UNIQUE_UID: 'true'
+      SCENE_RENDER_UID_BASE: ${SCENE_RENDER_UID_BASE:-10000}
+      MODEL_GATEWAY_ALLOWLIST: ${MODEL_GATEWAY_ALLOWLIST:?set MODEL_GATEWAY_ALLOWLIST}
+      CREDENTIAL_ENCRYPTION_KEY: ${CREDENTIAL_ENCRYPTION_KEY:?set CREDENTIAL_ENCRYPTION_KEY}
+      CREDENTIAL_ENCRYPTION_KEY_ID: ${CREDENTIAL_ENCRYPTION_KEY_ID:-v1}
+      CORS_ORIGINS: ${SCENE_ORIGIN:-http://localhost:3011}
+    volumes:
+      - scene-assets:/app/scene_assets
+      - legacy-uploads:/app/uploads
+      - scene-jobs:/jobs:ro
+    depends_on:
+      postgres: { condition: service_healthy }
+    networks: [private]
+
+  worker:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile.scene
+    environment:
+      <<: *scene-env
+      BANANA_SKIP_AUTO_MIGRATE: '1'
+    volumes:
+      - scene-assets:/app/scene_assets
+      - scene-jobs:/jobs
+    command: ["sh", "-c", "cd /app/backend && exec /app/.venv/bin/python -m workers.scene_runner"]
+    # Worker has no HTTP listener; API readiness checks its DB heartbeat.
+    healthcheck:
+      disable: true
+    depends_on:
+      backend: { condition: service_healthy }
+      renderer: { condition: service_started }
+    networks: [private]
+
+  renderer:
+    build:
+      context: .
+      dockerfile: renderer/Dockerfile
+    environment:
+      SCENE_RENDER_JOB_ROOT: /jobs
+      RENDER_TIMEOUT_SECONDS: '180'
+      SCENE_RENDER_REQUIRE_UNIQUE_UID: 'true'
+    volumes:
+      - scene-jobs:/jobs
+    network_mode: none
+    read_only: true
+    tmpfs:
+      - /tmp:size=512m,mode=1777
+    cap_drop: [ALL]
+    # The trusted coordinator drops to a different UID/GID for every untrusted job.
+    cap_add: [CHOWN, DAC_OVERRIDE, SETUID, SETGID, KILL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 128
+    mem_limit: 3g
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile.scene
+    ports:
+      - "127.0.0.1:${FRONTEND_PORT:-3011}:80"
+    depends_on:
+      backend: { condition: service_healthy }
+    networks: [private]
+
+volumes:
+  scene-db:
+  scene-assets:
+  legacy-uploads:
+  scene-jobs:
+networks:
+  private:
+    internal: false
